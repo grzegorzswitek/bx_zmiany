@@ -330,7 +330,7 @@ class CostEstimate(models.Model):
     other_net = models.DecimalField(max_digits=8, decimal_places=2)
     creation_date = models.DateField()
     added_date = models.DateTimeField(auto_now_add=True)
-    number: int = models.CharField(max_length=10, null=True, blank=True)
+    number: str = models.CharField(max_length=10, null=True, blank=True)
     description: str = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -339,9 +339,9 @@ class CostEstimate(models.Model):
         verbose_name = 'CostEstimate'
         verbose_name_plural = 'CostEstimates'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of CostEstimate."""
-        pass
+        return f"{self.file_name or ''}; {self.net:.2f}; {self.description or ''}".strip('; ')
 
 
 # Kosztorys procedury - Through Model

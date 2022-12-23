@@ -10,7 +10,8 @@ from zmiany_aranz.models import (
     KindOfPremises, 
     Person, 
     Customer,
-    CustomerHandler
+    CustomerHandler,
+    CostEstimate
 )
 
 
@@ -173,3 +174,54 @@ class CustomerHandlerTest(TestCase):
         self.assertEqual(str(obj1), expected_str1)
         self.assertEqual(str(obj2), expected_str2)
         self.assertEqual(str(obj3), expected_str3)
+
+
+class CostEstimateTest(TestCase):
+    def test_cost_estimete_str(self):
+        obj1 = CostEstimate(
+            file_name='T2-M39B - Kosztorys.pdf',
+            net=1000.4,
+            vat=80,
+            gross=1080,
+            construction_net=0,
+            sanitary_net=0,
+            electric_net=0,
+            other_net=0,
+            creation_date='2022-02-02',
+            number='1',
+            description='kosztorys wstępny'
+        )
+        obj2 = CostEstimate(
+            file_name=None,
+            net=1000.4,
+            vat=80,
+            gross=1080,
+            construction_net=0,
+            sanitary_net=0,
+            electric_net=0,
+            other_net=0,
+            creation_date='2022-02-02',
+            number='1',
+            description='kosztorys wstępny'
+        )
+        obj3 = CostEstimate(
+            file_name=None,
+            net=1000.4,
+            vat=80,
+            gross=1080,
+            construction_net=0,
+            sanitary_net=0,
+            electric_net=0,
+            other_net=0,
+            creation_date='2022-02-02',
+            number='1',
+            description=None
+        )
+        expected_str1 = "T2-M39B - Kosztorys.pdf; 1000.40; kosztorys wstępny"
+        expected_str2 = "1000.40; kosztorys wstępny"
+        expected_str3 = "1000.40"
+        self.assertEqual(str(obj1), expected_str1)
+        self.assertEqual(str(obj2), expected_str2)
+        self.assertEqual(str(obj3), expected_str3)
+
+
