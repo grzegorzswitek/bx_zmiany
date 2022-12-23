@@ -235,9 +235,6 @@ class PersonAbstract(models.Model):
         verbose_name_plural = 'Persons'
         abstract = True
 
-    def __str__(self):
-        """Unicode representation of Person."""
-        pass
 
 
 # Osoba
