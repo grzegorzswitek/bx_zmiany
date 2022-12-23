@@ -195,7 +195,7 @@ class Premises(models.Model):
 
     def __str__(self):
         """Unicode representation of Premises."""
-        pass
+        return self.symbol
 
 
 # Typy lokali
