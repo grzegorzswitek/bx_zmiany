@@ -1,7 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from zmiany_aranz.models import Procedure, Investment, InvestmentStage, Building, Premises, KindOfPremises, Person
+from zmiany_aranz.models import (
+    Procedure, 
+    Investment, 
+    InvestmentStage, 
+    Building, 
+    Premises, 
+    KindOfPremises, 
+    Person, 
+    Customer
+)
 
 
 class UsermanagersTests(TestCase):
@@ -135,3 +144,17 @@ class PersonTests(TestCase):
         self.assertEqual(str(obj10), expected_str10)
         self.assertEqual(str(obj11), expected_str11)
         self.assertEqual(str(obj12), expected_str12)
+
+
+class CustomerTest(TestCase):
+    def test_customer_str(self):
+        obj1 = Customer(first_name='Jan', last_name='Kowalski')
+        obj2 = Customer(first_name='Jan')
+        obj3 = Customer(last_name='Kowalski')
+        expected_str1 = 'Jan Kowalski'
+        expected_str2 = 'Jan'
+        expected_str3 = 'Kowalski'
+        self.assertEqual(str(obj1), expected_str1)
+        self.assertEqual(str(obj2), expected_str2)
+        self.assertEqual(str(obj3), expected_str3)
+

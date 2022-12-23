@@ -235,6 +235,10 @@ class PersonAbstract(models.Model):
         verbose_name_plural = 'Persons'
         abstract = True
 
+    def __str__(self):
+        """Unicode representation of PersonAbstract."""
+        return f"{self.first_name or ''} {self.last_name or ''}".strip()
+
 
 # Osoba
 class Person(PersonAbstract):
@@ -290,7 +294,7 @@ class Customer(PersonAbstract):
 
     def __str__(self):
         """Unicode representation of Customer."""
-        pass
+        return super().__str__()
 
 
 # Opiekun Klienta
