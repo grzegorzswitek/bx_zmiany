@@ -430,7 +430,7 @@ class KindOfCost(models.Model):
 
     def __str__(self):
         """Unicode representation of KindOfCost."""
-        pass
+        return self.name
 
 
 # Model PozycjaKosztorysu??
