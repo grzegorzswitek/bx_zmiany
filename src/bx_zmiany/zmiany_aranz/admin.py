@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from zmiany_aranz.models import Procedure
+
+
+class ProcedureAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(Procedure, ProcedureAdmin)
