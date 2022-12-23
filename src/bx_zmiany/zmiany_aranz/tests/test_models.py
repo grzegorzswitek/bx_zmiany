@@ -42,3 +42,22 @@ class UsermanagersTests(TestCase):
             User.objects.create_superuser(
                 email='super@user.com', password='foo', is_superuser=False)
 
+class ProcedureTeste(TestCase):
+    
+    def setUp(self) -> None:
+        Procedure.objects.create()
+        Procedure.objects.create()
+
+    def test_procedure_number_one(self):
+        from datetime import date
+        current_year = date.today().year
+        expected_number = f"001/{str(current_year)[-2:]}"
+        procedure = Procedure.objects.get(pk=1)
+        self.assertEqual(procedure.number, expected_number)
+
+    def test_procedure_number_two(self):
+        from datetime import date
+        current_year = date.today().year
+        expected_number = f"002/{str(current_year)[-2:]}"
+        procedure = Procedure.objects.get(pk=2)
+        self.assertEqual(procedure.number, expected_number)
