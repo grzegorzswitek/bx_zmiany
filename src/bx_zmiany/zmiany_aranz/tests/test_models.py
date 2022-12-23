@@ -9,7 +9,8 @@ from zmiany_aranz.models import (
     Premises, 
     KindOfPremises, 
     Person, 
-    Customer
+    Customer,
+    CustomerHandler
 )
 
 
@@ -78,6 +79,8 @@ class InvestmentTests(TestCase):
         investment = Investment(name='Urzecze', symbol='URZ')
         excected_str = 'Urzecze (URZ)'
         self.assertEqual(str(investment), excected_str)
+
+
 class InvestmentStageTests(TestCase):
     def test_investment_stage_str(self):
         obj = InvestmentStage(name='Urzecze II', symbol='URZ-K')
@@ -158,3 +161,15 @@ class CustomerTest(TestCase):
         self.assertEqual(str(obj2), expected_str2)
         self.assertEqual(str(obj3), expected_str3)
 
+
+class CustomerHandlerTest(TestCase):
+    def test_customer_handler_str(self):
+        obj1 = CustomerHandler(first_name='Jan', last_name='Kowalski')
+        obj2 = CustomerHandler(first_name='Jan')
+        obj3 = CustomerHandler(last_name='Kowalski')
+        expected_str1 = 'Jan Kowalski'
+        expected_str2 = 'Jan'
+        expected_str3 = 'Kowalski'
+        self.assertEqual(str(obj1), expected_str1)
+        self.assertEqual(str(obj2), expected_str2)
+        self.assertEqual(str(obj3), expected_str3)

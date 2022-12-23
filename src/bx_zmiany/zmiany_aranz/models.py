@@ -313,7 +313,7 @@ class CustomerHandler(PersonAbstract):
 
     def __str__(self):
         """Unicode representation of CustomerHandler."""
-        pass
+        return super().__str__()
 
 
 # Kosztorys
