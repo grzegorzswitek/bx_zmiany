@@ -15,7 +15,8 @@ from zmiany_aranz.models import (
     CostEstimateOfProcedure,
     Invoice,
     Cost,
-    KindOfCost
+    KindOfCost,
+    CustomerOfProcedure
 )
 
 
@@ -302,4 +303,16 @@ class KindOfCostTest(TestCase):
     def test_kind_of_cost(self):
         obj = KindOfCost(name='Projekt zamienny')
         expected_str = 'Projekt zamienny'
+        self.assertEqual(str(obj), expected_str)
+
+
+class CustomerOfProcedureTest(TestCase):
+    def test_customer_of_procedure_str(self):
+        procedure = Procedure.objects.create()
+        number = procedure.number
+        customer = Customer(first_name='Anna', last_name='Kowalska')
+        obj = CustomerOfProcedure(
+            procedure=procedure,
+            customer=customer)
+        expected_str = f'Anna Kowalska ({number})'
         self.assertEqual(str(obj), expected_str)

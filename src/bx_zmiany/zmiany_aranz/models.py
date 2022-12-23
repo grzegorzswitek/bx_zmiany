@@ -109,7 +109,7 @@ class CustomerOfProcedure(models.Model):
 
     def __str__(self):
         """Unicode representation of CustomerOfProcedure."""
-        pass
+        return f"{str(self.customer)} ({str(self.procedure)})"
 
 
 # Inwestycja
