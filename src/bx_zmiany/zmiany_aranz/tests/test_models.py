@@ -11,7 +11,8 @@ from zmiany_aranz.models import (
     Person, 
     Customer,
     CustomerHandler,
-    CostEstimate
+    CostEstimate,
+    CostEstimateOfProcedure
 )
 
 
@@ -225,3 +226,22 @@ class CostEstimateTest(TestCase):
         self.assertEqual(str(obj3), expected_str3)
 
 
+class CostEstimateOfProcedureTest(TestCase):
+    def test_cost_estimate_of_procedure_str(self):
+        procedure = Procedure()
+        cost_estimate = CostEstimate(
+            file_name='T2-M39B - Kosztorys.pdf',
+            net=1000.4,
+            vat=80,
+            gross=1080,
+            construction_net=0,
+            sanitary_net=0,
+            electric_net=0,
+            other_net=0,
+            creation_date='2022-02-02',
+            number='1',
+            description='kosztorys wstępny'
+        )
+        obj = CostEstimateOfProcedure(procedure=procedure, cost_estimate=cost_estimate)
+        expected_str = f"{str(procedure)} ({str(cost_estimate)})"
+        self.assertEqual(str(obj), expected_str)

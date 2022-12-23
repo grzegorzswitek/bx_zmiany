@@ -359,9 +359,9 @@ class CostEstimateOfProcedure(models.Model):
         verbose_name = 'CostEstimateOfProcedure'
         verbose_name_plural = 'CostEstimateOfProcedures'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of CostEstimateOfProcedure."""
-        pass
+        return f"{str(self.procedure)} ({str(self.cost_estimate)})"
 
 
 # Faktura
