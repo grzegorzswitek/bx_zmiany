@@ -150,8 +150,8 @@ class InvestmentStage(models.Model):
         verbose_name_plural = 'InvestmentStages'
 
     def __str__(self):
-        """Unicode representation of InvestmentStage."""
-        pass
+        """Unicode representation of Investment."""
+        return f"{self.name} ({self.symbol})"
 
 
 # Budynek
