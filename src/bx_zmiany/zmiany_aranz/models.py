@@ -236,14 +236,23 @@ class PersonAbstract(models.Model):
         abstract = True
 
 
-
 # Osoba
 class Person(PersonAbstract):
-    """Model definition for Person."""
+    """
+    Model definition for Person.
+    
+    Attributes
+    ----------
+    first_name : str
+    last_name : str
+    phone : str
+    e_mail : str
+    role : str
+    company : str
+    """
 
-    # TODO: Define fields here
-    role = models.CharField(max_length=50, null=True, blank=True)
     company = models.CharField(max_length=50, null=True, blank=True)
+    role = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
         """Meta definition for Person."""
@@ -253,7 +262,18 @@ class Person(PersonAbstract):
 
     def __str__(self):
         """Unicode representation of Person."""
-        pass
+        result = ''
+        if self.first_name:
+            result += self.first_name
+        if self.last_name:
+            result +=  ' ' + self.last_name
+        if self.company and self.role:
+            result += ' (' + self.company + ' - ' + self.role + ')'
+        elif self.company:
+            result += ' (' + self.company + ')'
+        elif self.role:
+            result += ' (' + self.role + ')'
+        return result.strip()
 
 
 # Klient

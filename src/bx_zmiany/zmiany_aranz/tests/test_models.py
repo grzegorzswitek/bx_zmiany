@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from zmiany_aranz.models import Procedure, Investment, InvestmentStage, Building, Premises, KindOfPremises
+from zmiany_aranz.models import Procedure, Investment, InvestmentStage, Building, Premises, KindOfPremises, Person
 
 
 class UsermanagersTests(TestCase):
@@ -69,8 +69,6 @@ class InvestmentTests(TestCase):
         investment = Investment(name='Urzecze', symbol='URZ')
         excected_str = 'Urzecze (URZ)'
         self.assertEqual(str(investment), excected_str)
-
-
 class InvestmentStageTests(TestCase):
     def test_investment_stage_str(self):
         obj = InvestmentStage(name='Urzecze II', symbol='URZ-K')
@@ -97,3 +95,43 @@ class KindOfPremisesTests(TestCase):
         obj = KindOfPremises(name='lokal mieszkalny', symbol='M')
         expected_str = 'lokal mieszkalny (M)'
         self.assertEqual(str(obj), expected_str)
+
+
+class PersonTests(TestCase):
+    def test_person_str(self):
+        obj1 = Person(first_name='Jan', last_name='Kowalski', role='Kierownik budowy', company='LECH')
+        obj2 = Person(first_name='Jan', last_name='Kowalski', role='Kierownik budowy')
+        obj3 = Person(first_name='Jan', last_name='Kowalski', company='LECH')
+        obj4 = Person(first_name='Jan', last_name='Kowalski')
+        obj5 = Person(first_name='Jan')
+        obj6 = Person(last_name='Kowalski')
+        obj7 = Person(first_name='Jan', role='Kierownik budowy', company='LECH')
+        obj8 = Person(first_name='Jan', role='Kierownik budowy')
+        obj9 = Person(first_name='Jan', company='LECH')
+        obj10 = Person(last_name='Kowalski', role='Kierownik budowy', company='LECH')
+        obj11 = Person(last_name='Kowalski', role='Kierownik budowy')
+        obj12 = Person(last_name='Kowalski', company='LECH')
+        expected_str1 = 'Jan Kowalski (LECH - Kierownik budowy)'
+        expected_str2 = 'Jan Kowalski (Kierownik budowy)'
+        expected_str3 = 'Jan Kowalski (LECH)'
+        expected_str4 = 'Jan Kowalski'
+        expected_str5 = 'Jan'
+        expected_str6 = 'Kowalski'
+        expected_str7 = 'Jan (LECH - Kierownik budowy)'
+        expected_str8 = 'Jan (Kierownik budowy)'
+        expected_str9 = 'Jan (LECH)'
+        expected_str10 = 'Kowalski (LECH - Kierownik budowy)'
+        expected_str11 = 'Kowalski (Kierownik budowy)'
+        expected_str12 = 'Kowalski (LECH)'
+        self.assertEqual(str(obj1), expected_str1)
+        self.assertEqual(str(obj2), expected_str2)
+        self.assertEqual(str(obj3), expected_str3)
+        self.assertEqual(str(obj4), expected_str4)
+        self.assertEqual(str(obj5), expected_str5)
+        self.assertEqual(str(obj6), expected_str6)
+        self.assertEqual(str(obj7), expected_str7)
+        self.assertEqual(str(obj8), expected_str8)
+        self.assertEqual(str(obj9), expected_str9)
+        self.assertEqual(str(obj10), expected_str10)
+        self.assertEqual(str(obj11), expected_str11)
+        self.assertEqual(str(obj12), expected_str12)
