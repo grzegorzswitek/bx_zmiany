@@ -12,7 +12,8 @@ from zmiany_aranz.models import (
     Customer,
     CustomerHandler,
     CostEstimate,
-    CostEstimateOfProcedure
+    CostEstimateOfProcedure,
+    Invoice
 )
 
 
@@ -245,3 +246,42 @@ class CostEstimateOfProcedureTest(TestCase):
         obj = CostEstimateOfProcedure(procedure=procedure, cost_estimate=cost_estimate)
         expected_str = f"{str(procedure)} ({str(cost_estimate)})"
         self.assertEqual(str(obj), expected_str)
+
+
+class InvoiceTest(TestCase):
+    def test_invoice_str(self):
+        obj1 = Invoice(
+            number='1/2022',
+            invoice_date='2022-02-02',
+            due_date='2022-02-16',
+            net=100,
+            vat=8,
+            gross=108
+        )
+        obj2 = Invoice(
+            number='1/2022',
+            invoice_date='2022-02-02',
+            due_date='2022-02-16',
+            net=100,
+            vat=8,
+            gross=108,
+            paid=True
+        )
+        obj3 = Invoice(
+            number=None,
+            invoice_date='2022-02-02',
+            due_date='2022-02-16',
+            net=100,
+            vat=8,
+            gross=108,
+            paid=True
+        )
+        expected_str1 = "1/2022; 100.00; unpaid"
+        expected_str2 = "1/2022; 100.00; paid"
+        expected_str3 = "100.00; paid"
+        self.assertEqual(str(obj1), expected_str1)
+        self.assertEqual(str(obj2), expected_str2)
+        self.assertEqual(str(obj3), expected_str3)
+
+
+

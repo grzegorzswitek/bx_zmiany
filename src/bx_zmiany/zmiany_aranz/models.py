@@ -386,9 +386,9 @@ class Invoice(models.Model):
         verbose_name = 'Invoice'
         verbose_name_plural = 'Invoices'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of Invoice."""
-        pass
+        return f"{self.number or ''}; {self.net:.2f}; {'paid' if self.paid else 'unpaid'}".strip('; ')
 
 
 # Koszty
