@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from zmiany_aranz.models import Procedure, Investment, InvestmentStage, Building, Premises
+from zmiany_aranz.models import Procedure, Investment, InvestmentStage, Building, Premises, KindOfPremises
 
 
 class UsermanagersTests(TestCase):
@@ -89,4 +89,11 @@ class PremisesTests(TestCase):
     def test_premises_str(self):
         obj = Premises(symbol='T2-M39B')
         expected_str = 'T2-M39B'
+        self.assertEqual(str(obj), expected_str)
+
+
+class KindOfPremisesTests(TestCase):
+    def test_kind_of_premises_str(self):
+        obj = KindOfPremises(name='lokal mieszkalny', symbol='M')
+        expected_str = 'lokal mieszkalny (M)'
         self.assertEqual(str(obj), expected_str)

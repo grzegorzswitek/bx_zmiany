@@ -126,7 +126,7 @@ class Investment(models.Model):
         verbose_name = 'Investment'
         verbose_name_plural = 'Investments'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of Investment."""
         return f"{self.name} ({self.symbol})"
 
@@ -149,7 +149,7 @@ class InvestmentStage(models.Model):
         verbose_name = 'InvestmentStage'
         verbose_name_plural = 'InvestmentStages'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of InvestmentStage."""
         return f"{self.name} ({self.symbol})"
 
@@ -170,7 +170,7 @@ class Building(models.Model):
         verbose_name = 'Building'
         verbose_name_plural = 'Buildings'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of Building."""
         return f"{self.name} ({self.symbol})"
 
@@ -193,7 +193,7 @@ class Premises(models.Model):
         verbose_name = 'Premises'
         verbose_name_plural = 'Premisess'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of Premises."""
         return self.symbol
 
@@ -214,9 +214,9 @@ class KindOfPremises(models.Model):
         verbose_name = 'KindOfPremises'
         verbose_name_plural = 'KindOfPremisess'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of KindOfPremises."""
-        pass
+        return f"{self.name} ({self.symbol})"
 
 
 # Osoba - klasa Abstrakcyjna
