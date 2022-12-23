@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from zmiany_aranz.models import Procedure
+from zmiany_aranz.models import Procedure, Investment
 
 
 class UsermanagersTests(TestCase):
@@ -42,7 +42,8 @@ class UsermanagersTests(TestCase):
             User.objects.create_superuser(
                 email='super@user.com', password='foo', is_superuser=False)
 
-class ProcedureTeste(TestCase):
+
+class ProcedureTests(TestCase):
     
     def setUp(self) -> None:
         Procedure.objects.create()
@@ -61,3 +62,11 @@ class ProcedureTeste(TestCase):
         expected_number = f"002/{str(current_year)[-2:]}"
         procedure = Procedure.objects.get(pk=2)
         self.assertEqual(procedure.number, expected_number)
+
+
+class InvestmentTests(TestCase):
+    def test_investment_str(self):
+        investment = Investment(name='Urzecze II', symbol='URZ-K')
+        excected_str = 'Urzecze II (URZ-K)'
+        self.assertEqual(str(investment), excected_str)
+

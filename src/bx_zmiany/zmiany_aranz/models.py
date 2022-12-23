@@ -128,7 +128,7 @@ class Investment(models.Model):
 
     def __str__(self):
         """Unicode representation of Investment."""
-        pass
+        return f"{self.name} ({self.symbol})"
 
 
 # Etap Inwestycji
