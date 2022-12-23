@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
+from zmiany_aranz.models import Procedure
+
 
 class UsermanagersTests(TestCase):
 
@@ -39,3 +41,4 @@ class UsermanagersTests(TestCase):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
                 email='super@user.com', password='foo', is_superuser=False)
+
