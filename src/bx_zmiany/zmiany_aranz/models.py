@@ -62,7 +62,9 @@ class Procedure(models.Model):
 
     @property
     def number(self):
-        pass
+        number = str(self._number).zfill(3)
+        year = self._year[-2:]
+        return f"{number}/{year}"
 
     class Meta:
         """Meta definition for Procedure."""
