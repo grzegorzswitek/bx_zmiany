@@ -410,9 +410,9 @@ class Cost(models.Model):
         verbose_name = 'Cost'
         verbose_name_plural = 'Costs'
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of Cost."""
-        pass
+        return f"{self.name}; {self.gross:.2f} zł brutto".strip('; ')
 
 
 # Typ Kosztu

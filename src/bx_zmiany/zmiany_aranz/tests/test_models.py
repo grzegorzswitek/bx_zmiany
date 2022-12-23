@@ -13,7 +13,8 @@ from zmiany_aranz.models import (
     CustomerHandler,
     CostEstimate,
     CostEstimateOfProcedure,
-    Invoice
+    Invoice,
+    Cost
 )
 
 
@@ -284,4 +285,13 @@ class InvoiceTest(TestCase):
         self.assertEqual(str(obj3), expected_str3)
 
 
-
+class CostTest(TestCase):
+    def test_cost_str(self):
+        obj = Cost(
+            net=100,
+            vat=8,
+            gross=108,
+            name='Projekt zamienny c.o.'
+        )
+        expected_str = 'Projekt zamienny c.o.; 108.00 zł brutto'
+        self.assertEqual(str(obj), expected_str)
