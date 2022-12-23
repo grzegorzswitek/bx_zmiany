@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
@@ -66,6 +67,20 @@ class Procedure(models.Model):
         year = self._year[-2:]
         return f"{number}/{year}"
 
+    @classmethod
+    def _get_new_number_and_year(cls):
+        from datetime import date
+        current_year = date.today().year
+        max_numer = cls.objects.filter(_year__in=(current_year, str(current_year)[-2:])).aggregate(Max('_number'))['_number__max']
+        number = max_numer + 1 if max_numer else 1
+        year = str(current_year)
+        return number, year
+    
+    def save(self, *args, **kwargs):
+        if self.id is None:
+            self._number, self._year = self._get_new_number_and_year()
+        return super().save(*args, **kwargs)
+
     class Meta:
         """Meta definition for Procedure."""
 
@@ -73,9 +88,8 @@ class Procedure(models.Model):
         verbose_name_plural = 'Procedures'
         unique_together = ('_number', '_year')
 
-    def __str__(self):
-        """Unicode representation of Procedure."""
-        pass
+    def __str__(self) -> str:
+        return self.number
 
 
 # Klient procedury
