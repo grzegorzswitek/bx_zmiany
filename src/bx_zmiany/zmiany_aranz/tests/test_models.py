@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from zmiany_aranz.models import Procedure, Investment, InvestmentStage
+from zmiany_aranz.models import Procedure, Investment, InvestmentStage, Building
 
 
 class UsermanagersTests(TestCase):
@@ -75,4 +75,11 @@ class InvestmentStageTests(TestCase):
     def test_investment_stage_str(self):
         obj = InvestmentStage(name='Urzecze II', symbol='URZ-K')
         excected_str = 'Urzecze II (URZ-K)'
+        self.assertEqual(str(obj), excected_str)
+
+
+class BuildingTests(TestCase):
+    def test_building_str(self):
+        obj = Building(name='Urzecze II, budynek A', symbol='URZ-K-A')
+        excected_str = 'Urzecze II, budynek A (URZ-K-A)'
         self.assertEqual(str(obj), excected_str)

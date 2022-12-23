@@ -150,7 +150,7 @@ class InvestmentStage(models.Model):
         verbose_name_plural = 'InvestmentStages'
 
     def __str__(self):
-        """Unicode representation of Investment."""
+        """Unicode representation of InvestmentStage."""
         return f"{self.name} ({self.symbol})"
 
 
@@ -172,7 +172,7 @@ class Building(models.Model):
 
     def __str__(self):
         """Unicode representation of Building."""
-        pass
+        return f"{self.name} ({self.symbol})"
 
 
 # Lokal
