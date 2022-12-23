@@ -266,11 +266,7 @@ class Person(PersonAbstract):
 
     def __str__(self):
         """Unicode representation of Person."""
-        result = ''
-        if self.first_name:
-            result += self.first_name
-        if self.last_name:
-            result +=  ' ' + self.last_name
+        result = super().__str__()
         if self.company and self.role:
             result += ' (' + self.company + ' - ' + self.role + ')'
         elif self.company:
