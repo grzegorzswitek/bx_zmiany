@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Max
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from .managers import CustomUserManager
 
@@ -41,7 +42,7 @@ class Procedure(models.Model):
 
     _number = models.IntegerField(editable=False)
     _year = models.CharField(max_length=4, editable=False)
-    premises = models.ManyToManyField('Premises', blank=True, related_name='precedures') # TODO: do sprawdzenia model odniesienia
+    premises = models.ManyToManyField('Premises', blank=True, related_name='precedures') 
     customers = models.ManyToManyField('Customer', through='CustomerOfProcedure', blank=True, related_name='proceudres')
     persons = models.ManyToManyField('Person', blank=True, related_name='procedures')
     customer_handler = models.ManyToManyField('CustomerHandler', blank=True, related_name='procedures')
@@ -55,6 +56,7 @@ class Procedure(models.Model):
     accepted = models.BooleanField(default=False) # do zestawienia faktur - jako przyjęte, ale faktura niekoniecznie wystawiona
     directory = models.CharField(max_length=260, null=True, blank=True)  # może models.FilePathField? 
     comment = models.TextField(null=True, blank=True)
+    # TODO: dodać pole customer (oprócz person)
 
     # umowy chyba niepotrzebne, mogą być szukane na bieżąco w crm?? może jako osobna funkcja/właściwość
     # zakres zmian? jakaś checklista? do tej pory nie miałem 
@@ -96,10 +98,9 @@ class Procedure(models.Model):
 class CustomerOfProcedure(models.Model):
     """Model definition for CustomerOfProcedure."""
 
-    # TODO: Define fields here
     procedure = models.ForeignKey('Procedure', on_delete=models.CASCADE)
     customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
-    shares = models.FloatField(null=True, blank=True)  # Udziały
+    shares = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], null=True, blank=True)  # Udziały
 
     class Meta:
         """Meta definition for CustomerOfProcedure."""
@@ -116,7 +117,7 @@ class CustomerOfProcedure(models.Model):
 class Investment(models.Model):
     """Model definition for Investment."""
 
-    # TODO: czy jest potrzebne odniesienie od TBL_INWESTYCJE w CRM? Chyba nie
+    # THINK: czy jest potrzebne odniesienie od TBL_INWESTYCJE w CRM? Chyba nie
     symbol = models.CharField(max_length=12, unique=True)
     name = models.CharField(max_length=30, unique=True)
 
@@ -158,7 +159,7 @@ class InvestmentStage(models.Model):
 class Building(models.Model):
     """Model definition for Building."""
     
-    # TODO: czy jest potzebne odniesienie od TBL_BUDYNKI w CRM? Chyba nie
+    # THINK: czy jest potzebne odniesienie od TBL_BUDYNKI w CRM? Chyba nie
     investment_stage = models.ForeignKey('InvestmentStage', on_delete=models.SET_NULL, null=True)
     symbol = models.CharField(max_length=12, unique=True)
     name = models.CharField(max_length=30, unique=True)
@@ -202,8 +203,6 @@ class Premises(models.Model):
 class KindOfPremises(models.Model):
     """Model definition for KindOfPremises."""
 
-    # TODO: Define fields here
-    # mieszkalny, usługowy, miejsce postojowe, garaż, komórka lokatorska
     symbol = models.CharField(max_length=12, unique=True)
     name = models.CharField(max_length=30, unique=True)
     description = models.TextField(null=True, blank=True)
@@ -419,7 +418,6 @@ class Cost(models.Model):
 class KindOfCost(models.Model):
     """Model definition for KindOfCost."""
 
-    # TODO: Define fields here
     name = models.CharField(max_length=100)
 
     class Meta:
