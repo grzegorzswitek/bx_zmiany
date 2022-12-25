@@ -233,7 +233,7 @@ class Premises(models.Model):
         return self.symbol
 
 
-# Typy lokali
+# Typy lokali - edycja raczej tylko w adminie
 class KindOfPremises(models.Model):
     """Model definition for KindOfPremises."""
 
@@ -328,7 +328,7 @@ class Customer(PersonAbstract):
         return super().__str__()
 
 
-# Opiekun Klienta
+# Opiekun Klienta - edycja raczej tylko w adminie
 class CustomerHandler(PersonAbstract):
     """Model definition for CustomerHandler."""
 
