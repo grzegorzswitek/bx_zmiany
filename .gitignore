@@ -307,3 +307,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,python,visualstudiocode,django
+run_server.bat
+run_shell.bat
+run_venv.bat
+script_server.bat
+script_shell.bat
+script_venv.bat
