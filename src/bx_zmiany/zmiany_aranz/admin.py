@@ -80,8 +80,13 @@ class PremisesAdmin(admin.ModelAdmin):
     pass
 
 
+class CustomerOfProcedureInline(admin.TabularInline):
+    model = CustomerOfProcedure
+    extra = 1
+
+
 class ProcedureAdmin(admin.ModelAdmin):
-    pass
+    inlines = (CustomerOfProcedureInline,)
 
 
 admin.site.register(Building, BuildingAdmin)
