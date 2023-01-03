@@ -92,3 +92,39 @@ class ProcedureCostsListTests(TestCase):
             reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": 1})
         )
         self.assertEqual(response.status_code, 404)
+
+
+class ProcedureCostCreateTests(TestCase):
+    def test_create_cost(self):
+        procedure = Procedure.objects.create()
+        kind = KindOfCost.objects.create(name="Projekt zamienny")
+        response = self.client.post(
+            reverse("zmiany_aranz:procedure_cost_create", kwargs={"pk": procedure.pk}),
+            {
+                "net": 100,
+                "vat": 8,
+                "gross": 108,
+                "name": "projekt zamienny",
+                "kind": kind.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Cost.objects.last().name, "projekt zamienny")
+
+    def test_display_cost(self):
+        procedure = Procedure.objects.create()
+        kind = KindOfCost.objects.create(name="Projekt zamienny")
+        cost = Cost.objects.create(
+            net=100,
+            vat=8,
+            gross=108,
+            name="projekt zamienny",
+            kind=kind,
+        )
+        procedure.costs.set([cost])
+        response = self.client.get(
+            reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rodzaj: Projekt zamienny")

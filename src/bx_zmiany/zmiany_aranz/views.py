@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.views import View
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, CreateView
+from django.urls import reverse
 
 from .models import Procedure, Cost
 
@@ -38,3 +39,27 @@ class ProcedureCostsList(ListView):
         except Procedure.DoesNotExist:
             raise Http404
         return super().get(request, *args, **kwargs)
+
+
+class CostCreateView(CreateView):
+    model = Cost
+    template_name = "zmiany_aranz/procedure_cost_create.html"
+    fields = "__all__"
+
+    def get_success_url(self):
+        pk = self.kwargs.get("pk", None)
+        if pk is None:
+            return super().get_success_url()
+        return reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": pk})
+
+    def form_valid(self, form):
+        response = super(CostCreateView, self).form_valid(form)
+        pk = self.kwargs.get("pk", None)
+        if pk is None:
+            raise Http404
+        try:
+            procedure = Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            return Http404
+        procedure.costs.add(self.object)
+        return response
