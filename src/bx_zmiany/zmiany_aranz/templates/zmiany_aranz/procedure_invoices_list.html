@@ -1,0 +1,29 @@
+<title>{{ procedure.premises.all.0 }} • {{ procedure }} </title>
+
+<h1> Faktury procedury </h1>
+
+
+{% if object_list|length == 0 %}
+    <b>Brak faktur.</b>
+{% else %}
+    
+    {% for invoice in object_list %}
+    <strong> {{ invoice.name|capfirst }} </strong>
+    <ul>
+        <li>Numer: {{ invoice.number }}</li>
+        <li>Data wystawienia: {{ invoice.invoice_date }}</li>
+        <li>Termin płatności: {{ invoice.due_date }}</li>
+        <li>Netto: {{ invoice.net }} zł</li>
+        <li>VAT: {{ invoice.vat }} zł</li>
+        <li>Brutto: {{ invoice.gross }} zł</li>
+        <li>Opis: {{ invoice.description }}</li>
+        <a href="{% url 'zmiany_aranz:invoice_update' invoice.pk %}">Edytuj</a><br>
+        <a href="{% url 'zmiany_aranz:invoice_delete' invoice.pk %}">Usuń</a>
+    </ul>
+    {% endfor %}
+        
+{% endif %}
+
+<p>
+    <a href="{% url 'zmiany_aranz:procedure_invoice_create' procedure.pk %}">Dodaj fakturę</a>
+</p>
