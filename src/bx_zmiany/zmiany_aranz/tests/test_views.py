@@ -128,3 +128,32 @@ class ProcedureCostCreateTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Rodzaj: Projekt zamienny")
+
+
+class CostDeleteTest(TestCase):
+    def setUp(self) -> None:
+        self.procedure = Procedure.objects.create()
+        self.kind = KindOfCost.objects.create(name="Projekt zamienny")
+        self.cost = Cost.objects.create(
+            net=100,
+            vat=8,
+            gross=108,
+            name="projekt zamienny",
+            kind=self.kind,
+        )
+        self.procedure.costs.set([self.cost])
+
+    def test_delete_confirmation_page(self):
+        response = self.client.get(
+            reverse("zmiany_aranz:cost_delete", kwargs={"pk": self.cost.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Czy na pewno usunąć koszt?")
+
+    def test_delete_success_page(self):
+        response = self.client.post(
+            reverse("zmiany_aranz:cost_delete", kwargs={"pk": self.cost.pk}),
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Brak kosztów.")

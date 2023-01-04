@@ -10,11 +10,12 @@
     {% for cost in object_list %}
     <strong> {{ cost.name|capfirst }} </strong>
     <ul>
-        <li>Netto: {{ cost.net }} zł</li>
-        <li>VAT: {{ cost.vat }} zł</li>
-        <li>Brutto: {{ cost.gross }} zł</li>
-        <li>Opis: {{ cost.description }}</li>
-        <li>Rodzaj: {{ cost.kind }}</li>
+        <li>Netto:      {{ cost.net }} zł</li>
+        <li>VAT:        {{ cost.vat }} zł</li>
+        <li>Brutto:     {{ cost.gross }} zł</li>
+        <li>Opis:       {{ cost.description }}</li>
+        <li>Rodzaj:     {{ cost.kind }}</li>
+        <a href="{% url 'zmiany_aranz:cost_delete' cost.pk %}">Usuń</a>
     </ul>
     {% endfor %}
         

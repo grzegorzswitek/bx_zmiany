@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.views import View
-from django.views.generic import DetailView, ListView, CreateView
+from django.views.generic import DetailView, ListView, CreateView, DeleteView
 from django.urls import reverse
 
 from .models import Procedure, Cost
@@ -46,7 +46,7 @@ class CostCreateView(CreateView):
     template_name = "zmiany_aranz/procedure_cost_create.html"
     fields = "__all__"
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
         if pk is None:
             return super().get_success_url()
@@ -63,3 +63,14 @@ class CostCreateView(CreateView):
             return Http404
         procedure.costs.add(self.object)
         return response
+
+
+class CostDeleteView(DeleteView):
+    model = Cost
+    template_name = "zmiany_aranz/cost_delete_confirm.html"
+
+    def get_success_url(self) -> str:
+        procedure = self.object.procedures.first()
+        if procedure is None:
+            return "/"
+        return reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
