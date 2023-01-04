@@ -4,6 +4,7 @@ from zmiany_aranz.views import (
     ProcedureCostsList,
     CostCreateView,
     CostDeleteView,
+    CostUpdateView,
 )
 
 app_name = "zmiany_aranz"
@@ -28,5 +29,10 @@ urlpatterns = [
         "cost/<int:pk>/delete/",
         CostDeleteView.as_view(),
         name="cost_delete",
+    ),
+    path(
+        "cost/<int:pk>/update/",
+        CostUpdateView.as_view(),
+        name="cost_update",
     ),
 ]

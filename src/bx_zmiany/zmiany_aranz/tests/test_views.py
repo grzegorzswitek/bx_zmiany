@@ -157,3 +157,34 @@ class CostDeleteTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Brak kosztów.")
+
+
+class CostUpdateTest(TestCase):
+    def setUp(self) -> None:
+        self.procedure = Procedure.objects.create()
+        self.kind = KindOfCost.objects.create(name="Projekt zamienny")
+        self.cost = Cost.objects.create(
+            net=100,
+            vat=8,
+            gross=108,
+            name="projekt zamienny",
+            kind=self.kind,
+        )
+        self.procedure.costs.set([self.cost])
+
+    def test_update_GET(self):
+        response = self.client.get(
+            reverse("zmiany_aranz:cost_update", kwargs={"pk": self.cost.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "100")
+
+    def test_update_POST(self):
+        response = self.client.post(
+            reverse("zmiany_aranz:cost_update", kwargs={"pk": self.cost.pk}),
+            {
+                "net": 200,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "200")
