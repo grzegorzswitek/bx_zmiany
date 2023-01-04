@@ -408,7 +408,7 @@ class Invoice(models.Model):
     """Model definition for Invoice."""
 
     file = models.FileField(upload_to="invoices", null=True, blank=True)
-    number: int = models.CharField(max_length=10, null=True, blank=True)
+    number: str = models.CharField(max_length=50, null=True, blank=True)
     invoice_date = models.DateField()
     due_date = models.DateField()
     net = models.DecimalField(max_digits=8, decimal_places=2)
