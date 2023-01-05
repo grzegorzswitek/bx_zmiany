@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # --------------------------
     "zmiany_aranz",
+    "crm",
 ]
 
 MIDDLEWARE = [
@@ -74,11 +77,25 @@ WSGI_APPLICATION = "bx_zmiany.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASE_ROUTERS = ("crm.dbrouters.MyDBRouter",)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
+    "crm": {
+        "ENGINE": os.environ.get("crm_db_ENGINE"),
+        "NAME": os.environ.get("crm_db_NAME"),
+        "USER": os.environ.get("crm_db_USER"),
+        "PASSWORD": os.environ.get("crm_db_PASSWORD"),
+        "HOST": os.environ.get("crm_db_HOST"),
+        "PORT": os.environ.get("crm_db_PORT"),
+        "OPTIONS": {
+            "driver": "SQL Server Native Client 11.0",
+            "connection_timeout": 1,
+        },
+    },
 }
 
 
