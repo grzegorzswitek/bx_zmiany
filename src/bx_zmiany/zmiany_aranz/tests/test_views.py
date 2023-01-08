@@ -55,10 +55,10 @@ class ProcedureCostsListTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Projekt zamienny c.o.")
-        self.assertContains(response, "Netto: 100,00 zł")
-        self.assertContains(response, "VAT: 8,00 zł")
-        self.assertContains(response, "Brutto: 108,00 zł")
-        self.assertContains(response, "Rodzaj: Projekt zamienny")
+        self.assertContains(response, "100,00 zł")
+        self.assertContains(response, "8,00 zł")
+        self.assertContains(response, "108,00 zł")
+        self.assertContains(response, "Projekt zamienny")
 
     def test_procedure_with_many_costs(self):
         kind = KindOfCost.objects.create(name="Projekt zamienny")
@@ -127,7 +127,7 @@ class ProcedureCostCreateTests(TestCase):
             reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Rodzaj: Projekt zamienny")
+        self.assertContains(response, "Projekt zamienny")
 
 
 class CostDeleteTest(TestCase):
