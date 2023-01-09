@@ -44,7 +44,7 @@ class Procedure(models.Model):
     _year = models.CharField(max_length=4, editable=False)
     premises = models.ManyToManyField("Premises", blank=True, related_name="precedures")
     customers = models.ManyToManyField(
-        "Customer", through="CustomerOfProcedure", blank=True, related_name="proceudres"
+        "Customer", through="CustomerOfProcedure", blank=True, related_name="procedures"
     )
     persons = models.ManyToManyField("Person", blank=True, related_name="procedures")
     customer_handler = models.ManyToManyField(

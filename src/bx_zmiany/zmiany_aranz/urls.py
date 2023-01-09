@@ -9,6 +9,10 @@ from zmiany_aranz.views import (
     InvoiceCreateView,
     InvoiceUpdateView,
     InvoiceDeleteView,
+    ProcedureCustomersList,
+    CustomerOfProcedureCreateView,
+    CustomerOfProcedureUpdateView,
+    CustomerOfProcedureDeleteView,
 )
 
 app_name = "zmiany_aranz"
@@ -58,5 +62,25 @@ urlpatterns = [
         "invoice/<int:pk>/delete/",
         InvoiceDeleteView.as_view(),
         name="invoice_delete",
+    ),
+    path(
+        "procedure/<int:pk>/customer/list/",
+        ProcedureCustomersList.as_view(),
+        name="procedure_customers_list",
+    ),
+    path(
+        "procedure/<int:pk>/customer/add/",
+        CustomerOfProcedureCreateView.as_view(),
+        name="customer_of_procedure_create",
+    ),
+    path(
+        "customer_of_procedure/<int:pk>/update/",
+        CustomerOfProcedureUpdateView.as_view(),
+        name="customer_of_procedure_update",
+    ),
+    path(
+        "customer_of_procedure/<int:pk>/delete/",
+        CustomerOfProcedureDeleteView.as_view(),
+        name="customer_of_procedure_delete",
     ),
 ]

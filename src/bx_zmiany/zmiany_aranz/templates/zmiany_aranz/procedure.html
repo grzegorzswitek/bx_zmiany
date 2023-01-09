@@ -55,3 +55,10 @@
     Uwagi: <br>
     {{ object.comment|linebreaks}}
 </p>
+<p>
+    <ul>
+        <li><a href="{% url 'zmiany_aranz:procedure_costs_list' procedure.pk %}">Koszty</a></li>
+        <li><a href="{% url 'zmiany_aranz:procedure_invoices_list' procedure.pk %}">Faktury</a></li>
+        <li><a href="{% url 'zmiany_aranz:procedure_customers_list' procedure.pk %}">Klienci</a></li>
+    </ul>
+</p>
