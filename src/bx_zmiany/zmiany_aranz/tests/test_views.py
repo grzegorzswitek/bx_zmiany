@@ -2,7 +2,14 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import setup_test_environment
 
-from zmiany_aranz.models import Procedure, Cost, KindOfCost, Invoice
+from zmiany_aranz.models import (
+    Procedure,
+    Cost,
+    KindOfCost,
+    Invoice,
+    Customer,
+    CustomerOfProcedure,
+)
 
 
 class ProcedureDetailViewTests(TestCase):
@@ -335,3 +342,149 @@ class InvoiceUpdateTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "200")
+
+
+class ProcedureCustomersListTests(TestCase):
+    def setUp(self):
+        self.procedure_1 = Procedure.objects.create()
+        self.procedure_2 = Procedure.objects.create()
+        self.customer_1 = Customer.objects.create(
+            first_name="Anna",
+            last_name="Kowalska",
+        )
+        self.customer_2 = Customer.objects.create(
+            first_name="Jan",
+            last_name="Kowalski",
+        )
+        self.procedure_1.customers.set([self.customer_1, self.customer_2])
+
+    def test_procedure_with_customers(self):
+        response = self.client.get(
+            reverse(
+                "zmiany_aranz:procedure_customers_list",
+                kwargs={"pk": self.procedure_1.pk},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anna")
+        self.assertContains(response, "Jan")
+
+    def test_procedure_without_customers(self):
+        response = self.client.get(
+            reverse(
+                "zmiany_aranz:procedure_customers_list",
+                kwargs={"pk": self.procedure_2.pk},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Brak klientów")
+
+    def test_procedure_does_not_exist(self):
+        response = self.client.get(
+            reverse(
+                "zmiany_aranz:procedure_customers_list",
+                kwargs={"pk": 0},
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class CustomerOfProcedureCreateTests(TestCase):
+    def setUp(self):
+        self.procedure = Procedure.objects.create()
+        self.customer = Customer.objects.create(
+            first_name="Anna",
+            last_name="Kowalska",
+        )
+
+    def test_customer_of_procedure_create(self):
+        response = self.client.post(
+            reverse(
+                "zmiany_aranz:customer_of_procedure_create",
+                kwargs={"pk": self.procedure.pk},
+            ),
+            {
+                "procedure": self.procedure.pk,
+                "customer": self.customer.pk,
+                "shares": 0.5,
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        customer_of_procedure = CustomerOfProcedure.objects.filter(
+            procedure=self.procedure
+        ).first()
+        self.assertEqual(customer_of_procedure.customer, self.customer)
+
+
+class CustomerOfProcedureUpdateTests(TestCase):
+    def setUp(self):
+        self.procedure = Procedure.objects.create()
+        self.customer = Customer.objects.create(
+            first_name="Anna",
+            last_name="Kowalska",
+        )
+        self.customer_of_procedure = CustomerOfProcedure.objects.create(
+            procedure=self.procedure, customer=self.customer
+        )
+
+    def test_customer_of_procedure_update(self):
+        response = self.client.post(
+            reverse(
+                "zmiany_aranz:customer_of_procedure_update",
+                kwargs={"pk": self.customer_of_procedure.pk},
+            ),
+            {
+                "procedure": self.procedure.pk,
+                "customer": self.customer.pk,
+                "shares": 0.1,
+            },
+            follow=True,
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                "zmiany_aranz:procedure_customers_list",
+                kwargs={"pk": self.procedure.pk},
+            ),
+        )
+
+
+class CustomerOfProcedureDeleteTests(TestCase):
+    def setUp(self):
+        self.procedure = Procedure.objects.create()
+        self.customer = Customer.objects.create(
+            first_name="Anna",
+            last_name="Kowalska",
+        )
+        self.customer_of_procedure = CustomerOfProcedure.objects.create(
+            procedure=self.procedure, customer=self.customer
+        )
+
+    def test_delete_confirmation_page(self):
+        response = self.client.get(
+            reverse(
+                "zmiany_aranz:customer_of_procedure_delete",
+                kwargs={"pk": self.customer_of_procedure.pk},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Czy na pewno usunąć klienta?")
+
+    def test_delete_success_page(self):
+        response = self.client.post(
+            reverse(
+                "zmiany_aranz:customer_of_procedure_delete",
+                kwargs={"pk": self.customer_of_procedure.pk},
+            ),
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Brak klientów.")
+        self.assertRedirects(
+            response,
+            reverse(
+                "zmiany_aranz:procedure_customers_list",
+                kwargs={"pk": self.procedure.pk},
+            ),
+        )

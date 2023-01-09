@@ -1,0 +1,26 @@
+<title>{{ procedure.premises.all.0 }} • {{ procedure }} </title>
+
+<h1> Klienci procedury </h1>
+
+
+{% if object_list|length == 0 %}
+    <b>Brak klientów.</b>
+{% else %}
+    
+    {% for c in object_list %}
+    <strong> {{ c.customer.name|capfirst }} </strong>
+    <ul>
+        <li>Imię: {{ c.customer.first_name }}</li>
+        <li>Nazwisko: {{ c.customer.last_name }}</li>
+        <li>Numer telefonu: {{ c.customer.phone }}</li>
+        <li>E-mail: {{ c.customer.e_mail }}</li>
+        <a href="{% url 'zmiany_aranz:customer_of_procedure_update' c.pk %}">Edytuj</a><br>
+        <a href="{% url 'zmiany_aranz:customer_of_procedure_delete' c.pk %}">Usuń</a>
+    </ul>
+    {% endfor %}
+        
+{% endif %}
+
+<p>
+    <a href="{% url 'zmiany_aranz:customer_of_procedure_create' procedure.pk %}">Dodaj klienta</a>
+</p>
