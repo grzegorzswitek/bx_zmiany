@@ -11,6 +11,10 @@ from zmiany_aranz.models import (
     CustomerOfProcedure,
 )
 
+from zmiany_aranz.apps import ZmianyAranzConfig
+
+APP_NAME = ZmianyAranzConfig.name
+
 
 class ProcedureDetailViewTests(TestCase):
     def test_procedure_status_code_200(self):
@@ -488,3 +492,68 @@ class CustomerOfProcedureDeleteTests(TestCase):
                 kwargs={"pk": self.procedure.pk},
             ),
         )
+
+
+class CustomerCreateTests(TestCase):
+    def test_customer_create(self):
+        response = self.client.post(
+            reverse(f"{APP_NAME}:customer_create"),
+            {"first_name": "Jan", "last_name": "Testowy"},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jan")
+        self.assertEqual(Customer.objects.last().first_name, "Jan")
+
+
+class CustomerDetailTests(TestCase):
+    def setUp(self):
+        self.customer = Customer.objects.create(first_name="Anna", last_name="Kowalska")
+
+    def test_customer_detail(self):
+        response = self.client.get(
+            reverse(f"{APP_NAME}:customer_detail", kwargs={"pk": self.customer.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anna")
+
+
+class CustomerUpdateTests(TestCase):
+    def setUp(self):
+        self.customer = Customer.objects.create(first_name="Anna", last_name="Kowalska")
+
+    def test_customer_update(self):
+        response = self.client.post(
+            reverse(f"{APP_NAME}:customer_update", kwargs={"pk": self.customer.pk}),
+            {"first_name": "Anna", "last_name": "Kwiatkowska"},
+            follow=True,
+        )
+        self.assertRedirects(
+            response,
+            reverse(f"{APP_NAME}:customer_detail", kwargs={"pk": self.customer.pk}),
+            status_code=302,
+            target_status_code=200,
+        )
+        self.assertEqual(Customer.objects.last().last_name, "Kwiatkowska")
+
+
+class CustomerDeleteTests(TestCase):
+    def setUp(self) -> None:
+        self.customer = Customer.objects.create(first_name="Anna", last_name="Kowalska")
+        self.procedure = Procedure.objects.create()
+        self.procedure.customers.set([self.customer])
+
+    def test_customer_delete_GET(self):
+        response = self.client.get(
+            reverse(f"{APP_NAME}:customer_delete", kwargs={"pk": self.customer.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Czy na pewno usunąć")
+        self.assertContains(response, self.procedure.number)
+
+    def test_customer_delete_POST(self):
+        response = self.client.post(
+            reverse(f"{APP_NAME}:customer_delete", kwargs={"pk": self.customer.pk})
+        )
+        self.assertRedirects(response, reverse(f"{APP_NAME}:index"), 302, 200)
+        self.assertQuerysetEqual(Customer.objects.all(), [])

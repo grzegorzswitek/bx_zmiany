@@ -1,5 +1,6 @@
 from django.urls import path
 from zmiany_aranz.views import (
+    IndexView,
     ProcedureDetailView,
     ProcedureCostsList,
     CostCreateView,
@@ -13,11 +14,20 @@ from zmiany_aranz.views import (
     CustomerOfProcedureCreateView,
     CustomerOfProcedureUpdateView,
     CustomerOfProcedureDeleteView,
+    CustomerCreateView,
+    CustomerDetailView,
+    CustomerUpdateView,
+    CustomerDeleteView,
 )
 
 app_name = "zmiany_aranz"
 
 urlpatterns = [
+    path(
+        "",
+        IndexView.as_view(),
+        name="index",
+    ),
     path(
         "procedure/<int:pk>/",
         ProcedureDetailView.as_view(),
@@ -82,5 +92,25 @@ urlpatterns = [
         "customer_of_procedure/<int:pk>/delete/",
         CustomerOfProcedureDeleteView.as_view(),
         name="customer_of_procedure_delete",
+    ),
+    path(
+        "customer/create/",
+        CustomerCreateView.as_view(),
+        name="customer_create",
+    ),
+    path(
+        "customer/<int:pk>/",
+        CustomerDetailView.as_view(),
+        name="customer_detail",
+    ),
+    path(
+        "customer/<int:pk>/update/",
+        CustomerUpdateView.as_view(),
+        name="customer_update",
+    ),
+    path(
+        "customer/<int:pk>/delete/",
+        CustomerDeleteView.as_view(),
+        name="customer_delete",
     ),
 ]

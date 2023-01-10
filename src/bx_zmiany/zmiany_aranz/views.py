@@ -1,3 +1,5 @@
+from typing import *
+
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.views import View
@@ -7,10 +9,15 @@ from django.views.generic import (
     CreateView,
     DeleteView,
     UpdateView,
+    TemplateView,
 )
 from django.urls import reverse
 
 from .models import Procedure, Cost, Invoice, Customer, CustomerOfProcedure
+
+
+class IndexView(TemplateView):
+    template_name = "index.html"
 
 
 class ProcedureDetailView(DetailView):
@@ -206,3 +213,36 @@ class CustomerOfProcedureUpdateView(UpdateView):
         return reverse(
             f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
         )
+
+
+class CustomerCreateView(CreateView):
+    """Class for Customer creating."""
+
+    model = Customer
+    fields = "__all__"
+
+
+class CustomerDetailView(DetailView):
+    """DetailView for Customer model."""
+
+    model = Customer
+
+
+class CustomerUpdateView(UpdateView):
+    """UpdateView for Customer model."""
+
+    model = Customer
+    fields = "__all__"
+
+
+class CustomerDeleteView(DeleteView):
+    """DeleteView for Customer model."""
+
+    model = Customer
+    success_url = "/"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        result = super().get_context_data(**kwargs)
+        if self.object is not None:
+            result.update({"assigned_to_procedures": self.object.procedures.all()})
+        return result
