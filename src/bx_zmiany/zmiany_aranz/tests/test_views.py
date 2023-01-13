@@ -21,7 +21,7 @@ class ProcedureDetailViewTests(TestCase):
         procedure = Procedure.objects.create()
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_detail_view",
+                f"{APP_NAME}:procedure_detail_view",
                 kwargs={"pk": procedure.pk},
             )
         )
@@ -33,7 +33,7 @@ class ProcedureDetailViewTests(TestCase):
         procedure = Procedure.objects.create()
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_detail_view",
+                f"{APP_NAME}:procedure_detail_view",
                 kwargs={"pk": procedure.pk + 1},
             )
         )
@@ -44,7 +44,7 @@ class ProcedureCostsListTests(TestCase):
     def test_procedure_without_costs(self):
         procedure = Procedure.objects.create()
         response = self.client.get(
-            reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
+            reverse(f"{APP_NAME}:procedure_costs_list", kwargs={"pk": procedure.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Brak kosztów")
@@ -62,7 +62,7 @@ class ProcedureCostsListTests(TestCase):
         procedure = Procedure.objects.create()
         procedure.costs.set([cost])
         response = self.client.get(
-            reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
+            reverse(f"{APP_NAME}:procedure_costs_list", kwargs={"pk": procedure.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Projekt zamienny c.o.")
@@ -92,7 +92,7 @@ class ProcedureCostsListTests(TestCase):
         procedure = Procedure.objects.create()
         procedure.costs.set([cost_1, cost_2])
         response = self.client.get(
-            reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
+            reverse(f"{APP_NAME}:procedure_costs_list", kwargs={"pk": procedure.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Projekt zamienny c.o.")
@@ -100,7 +100,7 @@ class ProcedureCostsListTests(TestCase):
 
     def test_procedure_does_not_exist(self):
         response = self.client.get(
-            reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": 1})
+            reverse(f"{APP_NAME}:procedure_costs_list", kwargs={"pk": 1})
         )
         self.assertEqual(response.status_code, 404)
 
@@ -110,7 +110,7 @@ class ProcedureCostCreateTests(TestCase):
         procedure = Procedure.objects.create()
         kind = KindOfCost.objects.create(name="Projekt zamienny")
         response = self.client.post(
-            reverse("zmiany_aranz:procedure_cost_create", kwargs={"pk": procedure.pk}),
+            reverse(f"{APP_NAME}:procedure_cost_create", kwargs={"pk": procedure.pk}),
             {
                 "net": 100,
                 "vat": 8,
@@ -135,7 +135,7 @@ class ProcedureCostCreateTests(TestCase):
         )
         procedure.costs.set([cost])
         response = self.client.get(
-            reverse("zmiany_aranz:procedure_costs_list", kwargs={"pk": procedure.pk})
+            reverse(f"{APP_NAME}:procedure_costs_list", kwargs={"pk": procedure.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Projekt zamienny")
@@ -156,14 +156,14 @@ class CostDeleteTest(TestCase):
 
     def test_delete_confirmation_page(self):
         response = self.client.get(
-            reverse("zmiany_aranz:cost_delete", kwargs={"pk": self.cost.pk})
+            reverse(f"{APP_NAME}:cost_delete", kwargs={"pk": self.cost.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Czy na pewno usunąć koszt?")
 
     def test_delete_success_page(self):
         response = self.client.post(
-            reverse("zmiany_aranz:cost_delete", kwargs={"pk": self.cost.pk}),
+            reverse(f"{APP_NAME}:cost_delete", kwargs={"pk": self.cost.pk}),
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -185,14 +185,14 @@ class CostUpdateTest(TestCase):
 
     def test_update_GET(self):
         response = self.client.get(
-            reverse("zmiany_aranz:cost_update", kwargs={"pk": self.cost.pk})
+            reverse(f"{APP_NAME}:cost_update", kwargs={"pk": self.cost.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "100")
 
     def test_update_POST(self):
         response = self.client.post(
-            reverse("zmiany_aranz:cost_update", kwargs={"pk": self.cost.pk}),
+            reverse(f"{APP_NAME}:cost_update", kwargs={"pk": self.cost.pk}),
             {
                 "net": 200,
             },
@@ -228,7 +228,7 @@ class ProcedureInvoicesListTests(TestCase):
     def test_procedure_without_invoices(self):
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_invoices_list",
+                f"{APP_NAME}:procedure_invoices_list",
                 kwargs={"pk": self.procedure_without_invoices.pk},
             )
         )
@@ -238,7 +238,7 @@ class ProcedureInvoicesListTests(TestCase):
     def test_procedure_with_invoices(self):
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_invoices_list",
+                f"{APP_NAME}:procedure_invoices_list",
                 kwargs={"pk": self.procedure_with_invoices.pk},
             )
         )
@@ -247,7 +247,7 @@ class ProcedureInvoicesListTests(TestCase):
 
     def test_procedure_does_not_exist(self):
         response = self.client.get(
-            reverse("zmiany_aranz:procedure_invoices_list", kwargs={"pk": 0})
+            reverse(f"{APP_NAME}:procedure_invoices_list", kwargs={"pk": 0})
         )
         self.assertEqual(response.status_code, 404)
 
@@ -269,7 +269,7 @@ class ProcedureInvoiceCreateTests(TestCase):
     def test_create_invoice(self):
         response = self.client.post(
             reverse(
-                "zmiany_aranz:procedure_invoice_create",
+                f"{APP_NAME}:procedure_invoice_create",
                 kwargs={"pk": self.procedure.pk},
             ),
             {
@@ -302,14 +302,14 @@ class InvoiceDeleteTest(TestCase):
 
     def test_delete_confirmation_page(self):
         response = self.client.get(
-            reverse("zmiany_aranz:invoice_delete", kwargs={"pk": self.invoice.pk})
+            reverse(f"{APP_NAME}:invoice_delete", kwargs={"pk": self.invoice.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Czy na pewno usunąć fakturę?")
 
     def test_delete_success_page(self):
         response = self.client.post(
-            reverse("zmiany_aranz:invoice_delete", kwargs={"pk": self.invoice.pk}),
+            reverse(f"{APP_NAME}:invoice_delete", kwargs={"pk": self.invoice.pk}),
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -332,14 +332,14 @@ class InvoiceUpdateTest(TestCase):
 
     def test_update_GET(self):
         response = self.client.get(
-            reverse("zmiany_aranz:invoice_update", kwargs={"pk": self.invoice.pk})
+            reverse(f"{APP_NAME}:invoice_update", kwargs={"pk": self.invoice.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "100")
 
     def test_update_POST(self):
         response = self.client.post(
-            reverse("zmiany_aranz:invoice_update", kwargs={"pk": self.invoice.pk}),
+            reverse(f"{APP_NAME}:invoice_update", kwargs={"pk": self.invoice.pk}),
             {
                 "net": 200,
             },
@@ -365,7 +365,7 @@ class ProcedureCustomersListTests(TestCase):
     def test_procedure_with_customers(self):
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_customers_list",
+                f"{APP_NAME}:procedure_customers_list",
                 kwargs={"pk": self.procedure_1.pk},
             )
         )
@@ -376,7 +376,7 @@ class ProcedureCustomersListTests(TestCase):
     def test_procedure_without_customers(self):
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_customers_list",
+                f"{APP_NAME}:procedure_customers_list",
                 kwargs={"pk": self.procedure_2.pk},
             )
         )
@@ -386,7 +386,7 @@ class ProcedureCustomersListTests(TestCase):
     def test_procedure_does_not_exist(self):
         response = self.client.get(
             reverse(
-                "zmiany_aranz:procedure_customers_list",
+                f"{APP_NAME}:procedure_customers_list",
                 kwargs={"pk": 0},
             )
         )
@@ -404,7 +404,7 @@ class CustomerOfProcedureCreateTests(TestCase):
     def test_customer_of_procedure_create(self):
         response = self.client.post(
             reverse(
-                "zmiany_aranz:customer_of_procedure_create",
+                f"{APP_NAME}:customer_of_procedure_create",
                 kwargs={"pk": self.procedure.pk},
             ),
             {
@@ -435,7 +435,7 @@ class CustomerOfProcedureUpdateTests(TestCase):
     def test_customer_of_procedure_update(self):
         response = self.client.post(
             reverse(
-                "zmiany_aranz:customer_of_procedure_update",
+                f"{APP_NAME}:customer_of_procedure_update",
                 kwargs={"pk": self.customer_of_procedure.pk},
             ),
             {
@@ -448,7 +448,7 @@ class CustomerOfProcedureUpdateTests(TestCase):
         self.assertRedirects(
             response,
             reverse(
-                "zmiany_aranz:procedure_customers_list",
+                f"{APP_NAME}:procedure_customers_list",
                 kwargs={"pk": self.procedure.pk},
             ),
         )
@@ -468,7 +468,7 @@ class CustomerOfProcedureDeleteTests(TestCase):
     def test_delete_confirmation_page(self):
         response = self.client.get(
             reverse(
-                "zmiany_aranz:customer_of_procedure_delete",
+                f"{APP_NAME}:customer_of_procedure_delete",
                 kwargs={"pk": self.customer_of_procedure.pk},
             )
         )
@@ -478,7 +478,7 @@ class CustomerOfProcedureDeleteTests(TestCase):
     def test_delete_success_page(self):
         response = self.client.post(
             reverse(
-                "zmiany_aranz:customer_of_procedure_delete",
+                f"{APP_NAME}:customer_of_procedure_delete",
                 kwargs={"pk": self.customer_of_procedure.pk},
             ),
             follow=True,
@@ -488,7 +488,7 @@ class CustomerOfProcedureDeleteTests(TestCase):
         self.assertRedirects(
             response,
             reverse(
-                "zmiany_aranz:procedure_customers_list",
+                f"{APP_NAME}:procedure_customers_list",
                 kwargs={"pk": self.procedure.pk},
             ),
         )

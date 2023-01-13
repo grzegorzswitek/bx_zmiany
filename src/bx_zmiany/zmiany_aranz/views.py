@@ -17,6 +17,10 @@ from django.urls import reverse
 
 from .models import Procedure, Cost, Invoice, Customer, CustomerOfProcedure
 
+from zmiany_aranz.apps import ZmianyAranzConfig
+
+APP_NAME = ZmianyAranzConfig.name
+
 
 class IndexView(TemplateView):
     template_name = "index.html"
@@ -25,7 +29,7 @@ class IndexView(TemplateView):
 class ProcedureDetailView(DetailView):
 
     model = Procedure
-    template_name = "zmiany_aranz/procedure.html"
+    template_name = f"{APP_NAME}/procedure.html"
 
 
 class ProcedureSubpagesAbstractListView(ListView):
@@ -60,7 +64,7 @@ class ProcedureSubpagesAbstractCreateView(CreateView):
         pk = self.kwargs.get("pk", None)
         if pk is None:
             return super().get_success_url()
-        return reverse(f"zmiany_aranz:{self.url_name}", kwargs={"pk": pk})
+        return reverse(f"{APP_NAME}:{self.url_name}", kwargs={"pk": pk})
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -81,7 +85,7 @@ class ProcedureSubpagesAbstractDeleteView(DeleteView):
         procedure = self.object.procedures.first()
         if procedure is None:
             return "/"
-        return reverse(f"zmiany_aranz:{self.url_name}", kwargs={"pk": procedure.pk})
+        return reverse(f"{APP_NAME}:{self.url_name}", kwargs={"pk": procedure.pk})
 
 
 class ProcedureSubpagesAbstractUpdateView(UpdateView):
@@ -89,18 +93,18 @@ class ProcedureSubpagesAbstractUpdateView(UpdateView):
 
     def get_success_url(self) -> str:
         procedure = self.object.procedures.first()
-        return reverse(f"zmiany_aranz:{self.url_name}", kwargs={"pk": procedure.pk})
+        return reverse(f"{APP_NAME}:{self.url_name}", kwargs={"pk": procedure.pk})
 
 
 class ProcedureCostsList(ProcedureSubpagesAbstractListView):
     model = Cost
-    template_name = "zmiany_aranz/procedure_costs_list.html"
+    template_name = f"{APP_NAME}/procedure_costs_list.html"
 
 
 class CostCreateView(ProcedureSubpagesAbstractCreateView):
     model = Cost
     fields = "__all__"
-    template_name = "zmiany_aranz/procedure_cost_create.html"
+    template_name = f"{APP_NAME}/procedure_cost_create.html"
     url_name = "procedure_costs_list"
 
     def form_valid(self, form):
@@ -111,26 +115,26 @@ class CostCreateView(ProcedureSubpagesAbstractCreateView):
 
 class CostDeleteView(ProcedureSubpagesAbstractDeleteView):
     model = Cost
-    template_name = "zmiany_aranz/cost_delete_confirm.html"
+    template_name = f"{APP_NAME}/cost_delete_confirm.html"
     url_name = "procedure_costs_list"
 
 
 class CostUpdateView(ProcedureSubpagesAbstractUpdateView):
     model = Cost
     fields = "__all__"
-    template_name = "zmiany_aranz/cost_update.html"
+    template_name = f"{APP_NAME}/cost_update.html"
     url_name = "procedure_costs_list"
 
 
 class ProcedureInvoicesList(ProcedureSubpagesAbstractListView):
     model = Invoice
-    template_name = "zmiany_aranz/procedure_invoices_list.html"
+    template_name = f"{APP_NAME}/procedure_invoices_list.html"
 
 
 class InvoiceCreateView(ProcedureSubpagesAbstractCreateView):
     model = Invoice
     fields = "__all__"
-    template_name = "zmiany_aranz/procedure_invoice_create.html"
+    template_name = f"{APP_NAME}/procedure_invoice_create.html"
     url_name = "procedure_invoices_list"
 
     def form_valid(self, form):
@@ -141,20 +145,20 @@ class InvoiceCreateView(ProcedureSubpagesAbstractCreateView):
 
 class InvoiceDeleteView(ProcedureSubpagesAbstractDeleteView):
     model = Invoice
-    template_name = "zmiany_aranz/invoice_delete_confirm.html"
+    template_name = f"{APP_NAME}/invoice_delete_confirm.html"
     url_name = "procedure_invoices_list"
 
 
 class InvoiceUpdateView(ProcedureSubpagesAbstractUpdateView):
     model = Invoice
     fields = "__all__"
-    template_name = "zmiany_aranz/invoice_update.html"
+    template_name = f"{APP_NAME}/invoice_update.html"
     url_name = "procedure_invoices_list"
 
 
 class ProcedureCustomersList(ListView):
     model = CustomerOfProcedure
-    template_name = "zmiany_aranz/procedure_customers_list.html"
+    template_name = f"{APP_NAME}/procedure_customers_list.html"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -183,37 +187,37 @@ class ProcedureCustomersList(ListView):
 class CustomerOfProcedureCreateView(CreateView):
     model = CustomerOfProcedure
     fields = "__all__"
-    template_name = "zmiany_aranz/procedure_customer_create.html"
+    template_name = f"{APP_NAME}/procedure_customer_create.html"
 
     def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
         if pk is None:
             return super().get_success_url()
-        return reverse(f"zmiany_aranz:procedure_customers_list", kwargs={"pk": pk})
+        return reverse(f"{APP_NAME}:procedure_customers_list", kwargs={"pk": pk})
 
 
 class CustomerOfProcedureDeleteView(DeleteView):
     model = CustomerOfProcedure
-    template_name = "zmiany_aranz/customer_of_procedure_delete_confirm.html"
+    template_name = f"{APP_NAME}/customer_of_procedure_delete_confirm.html"
 
     def get_success_url(self) -> str:
         procedure = self.object.procedure
         if procedure is None:
             return "/"
         return reverse(
-            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
         )
 
 
 class CustomerOfProcedureUpdateView(UpdateView):
     model = CustomerOfProcedure
     fields = "__all__"
-    template_name = "zmiany_aranz/customer_of_procedure_update.html"
+    template_name = f"{APP_NAME}/customer_of_procedure_update.html"
 
     def get_success_url(self) -> str:
         procedure = self.object.procedure
         return reverse(
-            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
         )
 
 
@@ -252,7 +256,7 @@ class CustomerDeleteView(DeleteView):
 
 class ProcedureCustomersList(ListView):
     model = CustomerOfProcedure
-    template_name = "zmiany_aranz/procedure_customers_list.html"
+    template_name = f"{APP_NAME}/procedure_customers_list.html"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -281,7 +285,7 @@ class ProcedureCustomersList(ListView):
 class CustomerOfProcedureCreateView(CreateView):
     model = CustomerOfProcedure
     fields = "__all__"
-    template_name = "zmiany_aranz/procedure_customer_create.html"
+    template_name = f"{APP_NAME}/procedure_customer_create.html"
 
     def get_initial(self) -> Dict[str, Any]:
         initial = super().get_initial()
@@ -304,26 +308,26 @@ class CustomerOfProcedureCreateView(CreateView):
         pk = self.kwargs.get("pk", None)
         if pk is None:
             return super().get_success_url()
-        return reverse(f"zmiany_aranz:procedure_customers_list", kwargs={"pk": pk})
+        return reverse(f"{APP_NAME}:procedure_customers_list", kwargs={"pk": pk})
 
 
 class CustomerOfProcedureDeleteView(DeleteView):
     model = CustomerOfProcedure
-    template_name = "zmiany_aranz/customer_of_procedure_delete_confirm.html"
+    template_name = f"{APP_NAME}/customer_of_procedure_delete_confirm.html"
 
     def get_success_url(self) -> str:
         procedure = self.object.procedure
         if procedure is None:
             return "/"
         return reverse(
-            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
         )
 
 
 class CustomerOfProcedureUpdateView(UpdateView):
     model = CustomerOfProcedure
     fields = "__all__"
-    template_name = "zmiany_aranz/customer_of_procedure_update.html"
+    template_name = f"{APP_NAME}/customer_of_procedure_update.html"
 
     def get_form(self):
         form = super().get_form()
@@ -333,7 +337,7 @@ class CustomerOfProcedureUpdateView(UpdateView):
     def get_success_url(self) -> str:
         procedure = self.object.procedure
         return reverse(
-            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
         )
 
 
