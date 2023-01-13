@@ -183,6 +183,23 @@ class CustomerOfProcedureCreateView(CreateView):
     fields = "__all__"
     template_name = "zmiany_aranz/procedure_customer_create.html"
 
+    def get_initial(self) -> Dict[str, Any]:
+        initial = super().get_initial()
+        pk = self.kwargs.get("pk", None)
+        if pk is None:
+            return initial
+        try:
+            procedure = Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            return initial
+        initial.update({"procedure": procedure})
+        return initial
+
+    def get_form(self):
+        form = super().get_form()
+        form.fields["procedure"].disabled = True
+        return form
+
     def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
         if pk is None:
@@ -207,6 +224,11 @@ class CustomerOfProcedureUpdateView(UpdateView):
     model = CustomerOfProcedure
     fields = "__all__"
     template_name = "zmiany_aranz/customer_of_procedure_update.html"
+
+    def get_form(self):
+        form = super().get_form()
+        form.fields["procedure"].disabled = True
+        return form
 
     def get_success_url(self) -> str:
         procedure = self.object.procedure
