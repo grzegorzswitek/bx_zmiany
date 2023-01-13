@@ -168,6 +168,7 @@ class CostDeleteTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Brak kosztów.")
+        self.assertQuerysetEqual(Cost.objects.all(), [])
 
 
 class CostUpdateTest(TestCase):
@@ -195,10 +196,16 @@ class CostUpdateTest(TestCase):
             reverse(f"{APP_NAME}:cost_update", kwargs={"pk": self.cost.pk}),
             {
                 "net": 200,
+                "vat": 16,
+                "gross": 216,
+                "name": "projekt zamienny",
+                "kind": self.kind.pk,
             },
+            follow=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "200")
+        self.assertEqual(Cost.objects.last().net, 200)
 
 
 class ProcedureInvoicesListTests(TestCase):
@@ -314,6 +321,7 @@ class InvoiceDeleteTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Brak faktur.")
+        self.assertQuerysetEqual(Invoice.objects.all(), [])
 
 
 class InvoiceUpdateTest(TestCase):
@@ -341,11 +349,19 @@ class InvoiceUpdateTest(TestCase):
         response = self.client.post(
             reverse(f"{APP_NAME}:invoice_update", kwargs={"pk": self.invoice.pk}),
             {
+                "number": "FVS/1/1/2022",
+                "invoice_date": "2022-01-01",
+                "due_date": "2022-01-15",
                 "net": 200,
+                "vat": 16,
+                "gross": 216,
+                "description": "",
             },
+            follow=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "200")
+        self.assertEqual(Invoice.objects.last().net, 200)
 
 
 class ProcedureCustomersListTests(TestCase):
@@ -419,6 +435,7 @@ class CustomerOfProcedureCreateTests(TestCase):
             procedure=self.procedure
         ).first()
         self.assertEqual(customer_of_procedure.customer, self.customer)
+        self.assertEqual(CustomerOfProcedure.objects.last().shares, 0.5)
 
 
 class CustomerOfProcedureUpdateTests(TestCase):
@@ -452,6 +469,7 @@ class CustomerOfProcedureUpdateTests(TestCase):
                 kwargs={"pk": self.procedure.pk},
             ),
         )
+        self.assertEqual(CustomerOfProcedure.objects.last().shares, 0.1)
 
 
 class CustomerOfProcedureDeleteTests(TestCase):
@@ -492,6 +510,7 @@ class CustomerOfProcedureDeleteTests(TestCase):
                 kwargs={"pk": self.procedure.pk},
             ),
         )
+        self.assertQuerysetEqual(CustomerOfProcedure.objects.all(), [])
 
 
 class CustomerCreateTests(TestCase):
