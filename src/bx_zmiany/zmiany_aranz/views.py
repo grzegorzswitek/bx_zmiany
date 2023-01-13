@@ -1,3 +1,7 @@
+from typing import *
+
+from typing import *
+
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.views import View
@@ -7,10 +11,15 @@ from django.views.generic import (
     CreateView,
     DeleteView,
     UpdateView,
+    TemplateView,
 )
 from django.urls import reverse
 
-from .models import Procedure, Cost, Invoice
+from .models import Procedure, Cost, Invoice, Customer, CustomerOfProcedure
+
+
+class IndexView(TemplateView):
+    template_name = "index.html"
 
 
 class ProcedureDetailView(DetailView):
@@ -141,3 +150,221 @@ class InvoiceUpdateView(ProcedureSubpagesAbstractUpdateView):
     fields = "__all__"
     template_name = "zmiany_aranz/invoice_update.html"
     url_name = "procedure_invoices_list"
+
+
+class ProcedureCustomersList(ListView):
+    model = CustomerOfProcedure
+    template_name = "zmiany_aranz/procedure_customers_list.html"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        pk = self.kwargs["pk"]
+        queryset = queryset.filter(procedure__in=[pk])
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs["pk"]
+        try:
+            context["procedure"] = Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            context["procedure"] = None
+        return context
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        try:
+            Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            raise Http404
+        return super().get(request, *args, **kwargs)
+
+
+class CustomerOfProcedureCreateView(CreateView):
+    model = CustomerOfProcedure
+    fields = "__all__"
+    template_name = "zmiany_aranz/procedure_customer_create.html"
+
+    def get_success_url(self) -> str:
+        pk = self.kwargs.get("pk", None)
+        if pk is None:
+            return super().get_success_url()
+        return reverse(f"zmiany_aranz:procedure_customers_list", kwargs={"pk": pk})
+
+
+class CustomerOfProcedureDeleteView(DeleteView):
+    model = CustomerOfProcedure
+    template_name = "zmiany_aranz/customer_of_procedure_delete_confirm.html"
+
+    def get_success_url(self) -> str:
+        procedure = self.object.procedure
+        if procedure is None:
+            return "/"
+        return reverse(
+            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+        )
+
+
+class CustomerOfProcedureUpdateView(UpdateView):
+    model = CustomerOfProcedure
+    fields = "__all__"
+    template_name = "zmiany_aranz/customer_of_procedure_update.html"
+
+    def get_success_url(self) -> str:
+        procedure = self.object.procedure
+        return reverse(
+            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+        )
+
+
+class CustomerCreateView(CreateView):
+    """Class for Customer creating."""
+
+    model = Customer
+    fields = "__all__"
+
+
+class CustomerDetailView(DetailView):
+    """DetailView for Customer model."""
+
+    model = Customer
+
+
+class CustomerUpdateView(UpdateView):
+    """UpdateView for Customer model."""
+
+    model = Customer
+    fields = "__all__"
+
+
+class CustomerDeleteView(DeleteView):
+    """DeleteView for Customer model."""
+
+    model = Customer
+    success_url = "/"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        result = super().get_context_data(**kwargs)
+        if self.object is not None:
+            result.update({"assigned_to_procedures": self.object.procedures.all()})
+        return result
+
+
+class ProcedureCustomersList(ListView):
+    model = CustomerOfProcedure
+    template_name = "zmiany_aranz/procedure_customers_list.html"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        pk = self.kwargs["pk"]
+        queryset = queryset.filter(procedure__in=[pk])
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs["pk"]
+        try:
+            context["procedure"] = Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            context["procedure"] = None
+        return context
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        try:
+            Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            raise Http404
+        return super().get(request, *args, **kwargs)
+
+
+class CustomerOfProcedureCreateView(CreateView):
+    model = CustomerOfProcedure
+    fields = "__all__"
+    template_name = "zmiany_aranz/procedure_customer_create.html"
+
+    def get_initial(self) -> Dict[str, Any]:
+        initial = super().get_initial()
+        pk = self.kwargs.get("pk", None)
+        if pk is None:
+            return initial
+        try:
+            procedure = Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            return initial
+        initial.update({"procedure": procedure})
+        return initial
+
+    def get_form(self):
+        form = super().get_form()
+        form.fields["procedure"].disabled = True
+        return form
+
+    def get_success_url(self) -> str:
+        pk = self.kwargs.get("pk", None)
+        if pk is None:
+            return super().get_success_url()
+        return reverse(f"zmiany_aranz:procedure_customers_list", kwargs={"pk": pk})
+
+
+class CustomerOfProcedureDeleteView(DeleteView):
+    model = CustomerOfProcedure
+    template_name = "zmiany_aranz/customer_of_procedure_delete_confirm.html"
+
+    def get_success_url(self) -> str:
+        procedure = self.object.procedure
+        if procedure is None:
+            return "/"
+        return reverse(
+            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+        )
+
+
+class CustomerOfProcedureUpdateView(UpdateView):
+    model = CustomerOfProcedure
+    fields = "__all__"
+    template_name = "zmiany_aranz/customer_of_procedure_update.html"
+
+    def get_form(self):
+        form = super().get_form()
+        form.fields["procedure"].disabled = True
+        return form
+
+    def get_success_url(self) -> str:
+        procedure = self.object.procedure
+        return reverse(
+            f"zmiany_aranz:procedure_customers_list", kwargs={"pk": procedure.pk}
+        )
+
+
+class CustomerCreateView(CreateView):
+    """Class for Customer creating."""
+
+    model = Customer
+    fields = "__all__"
+
+
+class CustomerDetailView(DetailView):
+    """DetailView for Customer model."""
+
+    model = Customer
+
+
+class CustomerUpdateView(UpdateView):
+    """UpdateView for Customer model."""
+
+    model = Customer
+    fields = "__all__"
+
+
+class CustomerDeleteView(DeleteView):
+    """DeleteView for Customer model."""
+
+    model = Customer
+    success_url = "/"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        result = super().get_context_data(**kwargs)
+        if self.object is not None:
+            result.update({"assigned_to_procedures": self.object.procedures.all()})
+        return result

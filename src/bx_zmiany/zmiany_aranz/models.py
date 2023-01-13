@@ -3,8 +3,12 @@ from django.db.models import Max
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.urls import reverse
 
 from .managers import CustomUserManager
+from .apps import ZmianyAranzConfig
+
+APP_NAME = ZmianyAranzConfig.name
 
 # https://learndjango.com/tutorials/django-custom-user-model
 
@@ -44,7 +48,7 @@ class Procedure(models.Model):
     _year = models.CharField(max_length=4, editable=False)
     premises = models.ManyToManyField("Premises", blank=True, related_name="precedures")
     customers = models.ManyToManyField(
-        "Customer", through="CustomerOfProcedure", blank=True, related_name="proceudres"
+        "Customer", through="CustomerOfProcedure", blank=True, related_name="procedures"
     )
     persons = models.ManyToManyField("Person", blank=True, related_name="procedures")
     customer_handler = models.ManyToManyField(
@@ -326,6 +330,9 @@ class Customer(PersonAbstract):
     def __str__(self):
         """Unicode representation of Customer."""
         return super().__str__()
+
+    def get_absolute_url(self):
+        return reverse(f"{APP_NAME}:customer_detail", kwargs={"pk": self.pk})
 
 
 # Opiekun Klienta - edycja raczej tylko w adminie

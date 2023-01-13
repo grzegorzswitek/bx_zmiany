@@ -1,0 +1,15 @@
+<form method="post">{% csrf_token %}
+    <p>Czy na pewno usunąć klienta "{{ object }}"?</p>
+    
+    {% if assigned_to_procedures %}
+        <p>Klient jest przypisany do następujących procedur:</p>
+        <ul>
+            {% for procedure in assigned_to_procedures %}
+                <li>{{ procedure }}</li>
+            {% endfor %}  
+        </ul>   
+    {% endif %}
+        
+    {{ form }}
+    <input type="submit" value="Usuń">
+</form>

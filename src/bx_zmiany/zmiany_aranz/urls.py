@@ -1,5 +1,6 @@
 from django.urls import path
 from zmiany_aranz.views import (
+    IndexView,
     ProcedureDetailView,
     ProcedureCostsList,
     CostCreateView,
@@ -9,11 +10,24 @@ from zmiany_aranz.views import (
     InvoiceCreateView,
     InvoiceUpdateView,
     InvoiceDeleteView,
+    ProcedureCustomersList,
+    CustomerOfProcedureCreateView,
+    CustomerOfProcedureUpdateView,
+    CustomerOfProcedureDeleteView,
+    CustomerCreateView,
+    CustomerDetailView,
+    CustomerUpdateView,
+    CustomerDeleteView,
 )
 
 app_name = "zmiany_aranz"
 
 urlpatterns = [
+    path(
+        "",
+        IndexView.as_view(),
+        name="index",
+    ),
     path(
         "procedure/<int:pk>/",
         ProcedureDetailView.as_view(),
@@ -58,5 +72,45 @@ urlpatterns = [
         "invoice/<int:pk>/delete/",
         InvoiceDeleteView.as_view(),
         name="invoice_delete",
+    ),
+    path(
+        "procedure/<int:pk>/customer/list/",
+        ProcedureCustomersList.as_view(),
+        name="procedure_customers_list",
+    ),
+    path(
+        "procedure/<int:pk>/customer/add/",
+        CustomerOfProcedureCreateView.as_view(),
+        name="customer_of_procedure_create",
+    ),
+    path(
+        "customer_of_procedure/<int:pk>/update/",
+        CustomerOfProcedureUpdateView.as_view(),
+        name="customer_of_procedure_update",
+    ),
+    path(
+        "customer_of_procedure/<int:pk>/delete/",
+        CustomerOfProcedureDeleteView.as_view(),
+        name="customer_of_procedure_delete",
+    ),
+    path(
+        "customer/create/",
+        CustomerCreateView.as_view(),
+        name="customer_create",
+    ),
+    path(
+        "customer/<int:pk>/",
+        CustomerDetailView.as_view(),
+        name="customer_detail",
+    ),
+    path(
+        "customer/<int:pk>/update/",
+        CustomerUpdateView.as_view(),
+        name="customer_update",
+    ),
+    path(
+        "customer/<int:pk>/delete/",
+        CustomerDeleteView.as_view(),
+        name="customer_delete",
     ),
 ]
