@@ -1,0 +1,1 @@
+wt nt -d . --title serwer --suppressApplicationTitle cmd /k script_server.bat ; nt -d . --title "venv" cmd /k script_venv.bat ; nt -p "Git Bash" -d . --title "Git" ; nt -d .
