@@ -11,9 +11,11 @@ from django.views.generic import (
     UpdateView,
     TemplateView,
 )
+from django.views.generic.edit import ModelFormMixin, ProcessFormView
 from django.urls import reverse
 
 from .models import Procedure, Cost, Invoice, Customer, CustomerOfProcedure
+from .forms import CustomerOfProcedureForm
 
 
 class IndexView(TemplateView):
@@ -180,7 +182,7 @@ class ProcedureCustomersList(ListView):
 
 class CustomerOfProcedureCreateView(CreateView):
     model = CustomerOfProcedure
-    fields = "__all__"
+    form_class = CustomerOfProcedureForm
     template_name = "zmiany_aranz/procedure_customer_create.html"
 
     def get_success_url(self) -> str:
@@ -215,11 +217,76 @@ class CustomerOfProcedureUpdateView(UpdateView):
         )
 
 
-class CustomerCreateView(CreateView):
+from django.core import serializers
+
+
+class PopupEditMixin(ModelFormMixin, ProcessFormView):
+    """View for Create and Update object by the popup window"""
+
+    @property
+    def _is_popup(self):
+        form = self.get_form()
+        return bool(form.data.get("_popup", False))
+
+    def _popup_action(self, request):
+        if not self._is_popup:
+            return None
+        path = request.__dict__.get("path", None)
+        if path is None:
+            return None
+        action = path.strip("/ ").split("/")[-1]
+        if action in ("add", "change"):
+            return action
+        return None
+
+    def _popup_response_data(self, action, object):
+        import json
+
+        if action not in ("add", "change"):
+            return
+        response_data = {}
+
+        # try:
+        response_data.update({"value": object.pk})
+        # except AttributeError:
+        #     return
+        response_data.update({"obj": str(object)})
+        if action == "change":
+            response_data.update({"new_value": object.pk})
+            response_data.update({"action": action})
+        return {"popup_response_data": json.dumps(response_data)}
+
+    def form_valid(self, form) -> HttpResponse:
+        response = super().form_valid(form)
+        self.context = self._popup_response_data(self.popup_action, self.object)
+        print(self.object)
+        return response
+
+    def post(self, request, *args: str, **kwargs: Any) -> HttpResponse:
+        if self._is_popup:
+            self.popup_action = self._popup_action(request)
+        response = super().post(request, *args, **kwargs)
+        if self._is_popup:
+
+            print(self.context)
+            template_name = "admin/popup_response.html"
+            return render(request, template_name, self.context)
+        return response
+
+
+# class PopupEditMixin(ModelFormMixin, ProcessFormView):
+#     def form_valid(self, form) -> HttpResponse:
+#         response = super().form_valid(form)
+#         print(self.object)
+#         return response
+
+
+class CustomerCreateView(PopupEditMixin, CreateView):
     """Class for Customer creating."""
 
     model = Customer
     fields = "__all__"
+    extra_context = {"popup_response_data": "extra_context"}
 
 
 class CustomerDetailView(DetailView):
@@ -228,7 +295,7 @@ class CustomerDetailView(DetailView):
     model = Customer
 
 
-class CustomerUpdateView(UpdateView):
+class CustomerUpdateView(PopupEditMixin, UpdateView):
     """UpdateView for Customer model."""
 
     model = Customer

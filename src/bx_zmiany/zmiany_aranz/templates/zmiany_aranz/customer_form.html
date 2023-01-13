@@ -1,6 +1,13 @@
+{% load static %}
+<script src="{% static 'admin/js/popup_response.js' %}"></script>
+<script src="/admin/jsi18n"></script>
+
+
 <form method="post">{% csrf_token %}
+    <input type="hidden" name="_popup" value="1">
     <table>
         {{ form.as_table }}
     </table>
     <input type="submit" value="Save">
 </form>
+

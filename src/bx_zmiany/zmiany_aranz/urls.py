@@ -94,7 +94,7 @@ urlpatterns = [
         name="customer_of_procedure_delete",
     ),
     path(
-        "customer/create/",
+        "customer/add/",
         CustomerCreateView.as_view(),
         name="customer_create",
     ),
@@ -104,12 +104,12 @@ urlpatterns = [
         name="customer_detail",
     ),
     path(
-        "customer/<int:pk>/update/",
+        "customer/<pk>/change/",
         CustomerUpdateView.as_view(),
         name="customer_update",
     ),
     path(
-        "customer/<int:pk>/delete/",
+        "customer/<pk>/delete/",
         CustomerDeleteView.as_view(),
         name="customer_delete",
     ),
