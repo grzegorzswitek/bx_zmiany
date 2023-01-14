@@ -1,27 +1,31 @@
-<title>{{ procedure.premises.all.0 }} • {{ procedure }} </title>
+{% extends 'base.html' %}
 
-<h1> Koszty procedury </h1>
+{% block content %}
+    <title>{{ procedure.premises.all.0 }} • {{ procedure }} </title>
+
+    <h1> Koszty procedury </h1>
 
 
-{% if object_list|length == 0 %}
-    <b>Brak kosztów.</b>
-{% else %}
-    
-    {% for cost in object_list %}
-    <strong> {{ cost.name|capfirst }} </strong>
-    <ul>
-        <li>Netto:      {{ cost.net }} zł</li>
-        <li>VAT:        {{ cost.vat }} zł</li>
-        <li>Brutto:     {{ cost.gross }} zł</li>
-        <li>Opis:       {{ cost.description }}</li>
-        <li>Rodzaj:     {{ cost.kind }}</li>
-        <a href="{% url 'zmiany_aranz:cost_update' cost.pk %}">Edytuj</a><br>
-        <a href="{% url 'zmiany_aranz:cost_delete' cost.pk %}">Usuń</a>
-    </ul>
-    {% endfor %}
+    {% if object_list|length == 0 %}
+        <b>Brak kosztów.</b>
+    {% else %}
         
-{% endif %}
+        {% for cost in object_list %}
+        <strong> {{ cost.name|capfirst }} </strong>
+        <ul>
+            <li>Netto:      {{ cost.net }} zł</li>
+            <li>VAT:        {{ cost.vat }} zł</li>
+            <li>Brutto:     {{ cost.gross }} zł</li>
+            <li>Opis:       {{ cost.description }}</li>
+            <li>Rodzaj:     {{ cost.kind }}</li>
+            <a href="{% url 'zmiany_aranz:cost_update' cost.pk %}">Edytuj</a><br>
+            <a href="{% url 'zmiany_aranz:cost_delete' cost.pk %}">Usuń</a>
+        </ul>
+        {% endfor %}
+            
+    {% endif %}
 
-<p>
-    <a href="{% url 'zmiany_aranz:procedure_cost_create' procedure.pk %}">Dodaj koszt</a>
-</p>
+    <p>
+        <a href="{% url 'zmiany_aranz:procedure_cost_create' procedure.pk %}">Dodaj koszt</a>
+    </p>
+{% endblock content %}
