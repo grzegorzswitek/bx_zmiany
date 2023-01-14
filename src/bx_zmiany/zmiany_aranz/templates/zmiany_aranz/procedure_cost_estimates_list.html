@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% load tailwind_filters %}
+
+
+{% block title %}
+    <title>{{ procedure.premises.all.0 }} • {{ procedure }} </title>
+{% endblock title %}
+    
+
+{% block content %}    
+    <h1 class="text-center text-xl font-semibold"> Kosztorysy procedury </h1>
+
+
+    {% if object_list|length == 0 %}
+        <b>Brak kosztorysów.</b>
+    {% else %}
+        
+        {% for cost_estimate in object_list %}
+            
+            <table class="table-auto">
+                <tbody>
+                    <tr>
+                        <td>Nazwa</td>
+                        <td>{{ cost_estimate.file_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Netto</td>
+                        <td>{{ cost_estimate.net }}</td>
+                    </tr>
+                    <tr>
+                        <td>VAT</td>
+                        <td>{{ cost_estimate.vat }}</td>
+                    </tr>
+                    <tr>
+                        <td>Brutto</td>
+                        <td>{{ cost_estimate.gross }}</td>
+                    </tr>
+                    <tr>
+                        <td>Data</td>
+                        <td>{{ cost_estimate.creation_date }}</td>
+                    </tr>
+                    <tr>
+                        <td>Opis</td>
+                        <td>{{ cost_estimate.description }}</td>
+                    </tr>
+                </tbody>
+            </table>
+                
+
+            <a href="{% url 'zmiany_aranz:cost_estimate_update' cost_estimate.pk %}" class="text-blue-600 no-underline hover:underline ">Edytuj</a><br>
+            <a href="{% url 'zmiany_aranz:cost_estimate_delete' cost_estimate.pk %}" class="text-red-600 no-underline hover:underline ">Usuń</a>
+        </ul>
+        {% endfor %}
+            
+    {% endif %}
+
+    <p>
+        <a href="{% url 'zmiany_aranz:procedure_cost_estimate_create' procedure.pk %}" class="text-green-600 no-underline hover:underline ">Dodaj kosztorys</a>
+    </p>
+{% endblock content %}
+    

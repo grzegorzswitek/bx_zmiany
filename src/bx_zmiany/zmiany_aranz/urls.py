@@ -6,6 +6,10 @@ from zmiany_aranz.views import (
     CostCreateView,
     CostUpdateView,
     CostDeleteView,
+    ProcedureCostEstimatesList,
+    CostEstimateCreateView,
+    CostEstimateUpdateView,
+    CostEstimateDeleteView,
     ProcedureInvoicesList,
     InvoiceCreateView,
     InvoiceUpdateView,
@@ -52,6 +56,26 @@ urlpatterns = [
         "cost/<int:pk>/delete/",
         CostDeleteView.as_view(),
         name="cost_delete",
+    ),
+    path(
+        "procedure/<int:pk>/cost_estimate/list/",
+        ProcedureCostEstimatesList.as_view(),
+        name="procedure_cost_estimates_list",
+    ),
+    path(
+        "procedure/<int:pk>/cost_estimate/add/",
+        CostEstimateCreateView.as_view(),
+        name="procedure_cost_estimate_create",
+    ),
+    path(
+        "cost_estimate/<int:pk>/update/",
+        CostEstimateUpdateView.as_view(),
+        name="cost_estimate_update",
+    ),
+    path(
+        "cost_estimate/<int:pk>/delete/",
+        CostEstimateDeleteView.as_view(),
+        name="cost_estimate_delete",
     ),
     path(
         "procedure/<int:pk>/invoice/list/",

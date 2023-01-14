@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% load tailwind_filters %}
+
+
+{% block content %}
+    Czy na pewno usunąć koszt?<br>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="text-red-600 no-underline hover:underline" >Usuń</button>
+    </form>
+{% endblock content %}
+    

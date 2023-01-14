@@ -15,7 +15,14 @@ from django.views.generic import (
 )
 from django.urls import reverse
 
-from .models import Procedure, Cost, Invoice, Customer, CustomerOfProcedure
+from .models import (
+    Procedure,
+    Cost,
+    Invoice,
+    Customer,
+    CustomerOfProcedure,
+    CostEstimate,
+)
 
 from zmiany_aranz.apps import ZmianyAranzConfig
 
@@ -58,13 +65,13 @@ class ProcedureSubpagesAbstractListView(ListView):
 
 
 class ProcedureSubpagesAbstractCreateView(CreateView):
-    url_name = ""
+    success_url_name = ""
 
     def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
         if pk is None:
             return super().get_success_url()
-        return reverse(f"{APP_NAME}:{self.url_name}", kwargs={"pk": pk})
+        return reverse(f"{APP_NAME}:{self.success_url_name}", kwargs={"pk": pk})
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -79,13 +86,15 @@ class ProcedureSubpagesAbstractCreateView(CreateView):
 
 
 class ProcedureSubpagesAbstractDeleteView(DeleteView):
-    url_name = ""
+    success_url_name = ""
 
     def get_success_url(self) -> str:
         procedure = self.object.procedures.first()
         if procedure is None:
             return "/"
-        return reverse(f"{APP_NAME}:{self.url_name}", kwargs={"pk": procedure.pk})
+        return reverse(
+            f"{APP_NAME}:{self.success_url_name}", kwargs={"pk": procedure.pk}
+        )
 
 
 class ProcedureSubpagesAbstractUpdateView(UpdateView):
@@ -93,7 +102,9 @@ class ProcedureSubpagesAbstractUpdateView(UpdateView):
 
     def get_success_url(self) -> str:
         procedure = self.object.procedures.first()
-        return reverse(f"{APP_NAME}:{self.url_name}", kwargs={"pk": procedure.pk})
+        return reverse(
+            f"{APP_NAME}:{self.success_url_name}", kwargs={"pk": procedure.pk}
+        )
 
 
 class ProcedureCostsList(ProcedureSubpagesAbstractListView):
@@ -105,7 +116,7 @@ class CostCreateView(ProcedureSubpagesAbstractCreateView):
     model = Cost
     fields = "__all__"
     template_name = f"{APP_NAME}/procedure_cost_create.html"
-    url_name = "procedure_costs_list"
+    success_url_name = "procedure_costs_list"
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -116,14 +127,14 @@ class CostCreateView(ProcedureSubpagesAbstractCreateView):
 class CostDeleteView(ProcedureSubpagesAbstractDeleteView):
     model = Cost
     template_name = f"{APP_NAME}/cost_delete_confirm.html"
-    url_name = "procedure_costs_list"
+    success_url_name = "procedure_costs_list"
 
 
 class CostUpdateView(ProcedureSubpagesAbstractUpdateView):
     model = Cost
     fields = "__all__"
     template_name = f"{APP_NAME}/cost_update.html"
-    url_name = "procedure_costs_list"
+    success_url_name = "procedure_costs_list"
 
 
 class ProcedureInvoicesList(ProcedureSubpagesAbstractListView):
@@ -135,7 +146,7 @@ class InvoiceCreateView(ProcedureSubpagesAbstractCreateView):
     model = Invoice
     fields = "__all__"
     template_name = f"{APP_NAME}/procedure_invoice_create.html"
-    url_name = "procedure_invoices_list"
+    success_url_name = "procedure_invoices_list"
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -146,14 +157,14 @@ class InvoiceCreateView(ProcedureSubpagesAbstractCreateView):
 class InvoiceDeleteView(ProcedureSubpagesAbstractDeleteView):
     model = Invoice
     template_name = f"{APP_NAME}/invoice_delete_confirm.html"
-    url_name = "procedure_invoices_list"
+    success_url_name = "procedure_invoices_list"
 
 
 class InvoiceUpdateView(ProcedureSubpagesAbstractUpdateView):
     model = Invoice
     fields = "__all__"
     template_name = f"{APP_NAME}/invoice_update.html"
-    url_name = "procedure_invoices_list"
+    success_url_name = "procedure_invoices_list"
 
 
 class ProcedureCustomersList(ListView):
@@ -372,3 +383,33 @@ class CustomerDeleteView(DeleteView):
         if self.object is not None:
             result.update({"assigned_to_procedures": self.object.procedures.all()})
         return result
+
+
+class ProcedureCostEstimatesList(ProcedureSubpagesAbstractListView):
+    model = CostEstimate
+    template_name = f"{APP_NAME}/procedure_cost_estimates_list.html"
+
+
+class CostEstimateCreateView(ProcedureSubpagesAbstractCreateView):
+    model = CostEstimate
+    fields = "__all__"
+    template_name = f"{APP_NAME}/procedure_cost_estimate_create.html"
+    success_url_name = "procedure_cost_estimates_list"
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.procedure.cost_estimates.add(self.object)
+        return response
+
+
+class CostEstimateDeleteView(ProcedureSubpagesAbstractDeleteView):
+    model = CostEstimate
+    template_name = f"{APP_NAME}/cost_estimate_delete_confirm.html"
+    success_url_name = "procedure_cost_estimates_list"
+
+
+class CostEstimateUpdateView(ProcedureSubpagesAbstractUpdateView):
+    model = CostEstimate
+    fields = "__all__"
+    template_name = f"{APP_NAME}/cost_estimate_update.html"
+    success_url_name = "procedure_cost_estimates_list"
