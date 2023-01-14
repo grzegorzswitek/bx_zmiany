@@ -2,6 +2,8 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import setup_test_environment
 
+from model_bakery import baker
+
 from zmiany_aranz.models import (
     Procedure,
     Cost,
@@ -9,6 +11,7 @@ from zmiany_aranz.models import (
     Invoice,
     Customer,
     CustomerOfProcedure,
+    CostEstimate,
 )
 
 from zmiany_aranz.apps import ZmianyAranzConfig
@@ -576,3 +579,143 @@ class CustomerDeleteTests(TestCase):
         )
         self.assertRedirects(response, reverse(f"{APP_NAME}:index"), 302, 200)
         self.assertQuerysetEqual(Customer.objects.all(), [])
+
+
+class ProcedureCostEstimatesListTests(TestCase):
+    def test_procedure_without_cost_estimates(self):
+        procedure = Procedure.objects.create()
+        response = self.client.get(
+            reverse(
+                f"{APP_NAME}:procedure_cost_estimates_list", kwargs={"pk": procedure.pk}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Brak kosztorysów")
+
+    def test_procedure_with_many_cost_estimates(self):
+        cost_estimate_1 = baker.make(CostEstimate, file_name="Kosztorys.rds")
+        cost_estimate_2 = baker.make(CostEstimate, file_name="Kosztorys 23.rds")
+        procedure = Procedure.objects.create()
+        procedure.cost_estimates.set([cost_estimate_1, cost_estimate_2])
+        response = self.client.get(
+            reverse(
+                f"{APP_NAME}:procedure_cost_estimates_list", kwargs={"pk": procedure.pk}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Kosztorys.rds")
+        self.assertContains(response, "Kosztorys 23.rds")
+
+    def test_procedure_does_not_exist(self):
+        response = self.client.get(
+            reverse(f"{APP_NAME}:procedure_cost_estimates_list", kwargs={"pk": 1})
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class ProcedureCostEstimateCreateTests(TestCase):
+    def test_create_cost_estimate(self):
+        procedure = Procedure.objects.create()
+        response = self.client.post(
+            reverse(
+                f"{APP_NAME}:procedure_cost_estimate_create",
+                kwargs={"pk": procedure.pk},
+            ),
+            {
+                "file_name": "Kosztorys123.pdf",
+                "net": 100,
+                "vat": 8,
+                "gross": 108,
+                "construction_net": 50,
+                "sanitary_net": 30,
+                "electric_net": 20,
+                "other_net": 0,
+                "creation_date": "2022-02-02",
+                "added_date": "2022-02-21",
+                "number": "10",
+                "description": "Kosztorys wstępny",
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CostEstimate.objects.last().description, "Kosztorys wstępny")
+
+    def test_display_cost_estimate(self):
+        procedure = Procedure.objects.create()
+        cost_estimate = baker.make(CostEstimate, file_name="Kosztorys.rds")
+        procedure.cost_estimates.set([cost_estimate])
+        response = self.client.get(
+            reverse(
+                f"{APP_NAME}:procedure_cost_estimates_list", kwargs={"pk": procedure.pk}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Kosztorys.rds")
+
+
+class CostEstimateDeleteTest(TestCase):
+    def setUp(self) -> None:
+        self.procedure = Procedure.objects.create()
+        self.cost_estimate = baker.make(CostEstimate)
+        self.procedure.cost_estimates.set([self.cost_estimate])
+
+    def test_delete_confirmation_page(self):
+        response = self.client.get(
+            reverse(
+                f"{APP_NAME}:cost_estimate_delete", kwargs={"pk": self.cost_estimate.pk}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Czy na pewno usunąć koszt?")
+
+    def test_delete_success_page(self):
+        response = self.client.post(
+            reverse(
+                f"{APP_NAME}:cost_estimate_delete", kwargs={"pk": self.cost_estimate.pk}
+            ),
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Brak kosztorysów.")
+        self.assertQuerysetEqual(CostEstimate.objects.all(), [])
+
+
+class CostEstimateUpdateTest(TestCase):
+    def setUp(self) -> None:
+        self.procedure = Procedure.objects.create()
+        self.cost_estimate = baker.make(CostEstimate, description="Wstępny")
+        self.procedure.cost_estimates.set([self.cost_estimate])
+
+    def test_update_GET(self):
+        response = self.client.get(
+            reverse(
+                f"{APP_NAME}:cost_estimate_update", kwargs={"pk": self.cost_estimate.pk}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Wstępny")
+
+    def test_update_POST(self):
+        response = self.client.post(
+            reverse(
+                f"{APP_NAME}:cost_estimate_update", kwargs={"pk": self.cost_estimate.pk}
+            ),
+            {
+                "file_name": "Kosztorys123.pdf",
+                "net": 100,
+                "vat": 8,
+                "gross": 108,
+                "construction_net": 50,
+                "sanitary_net": 30,
+                "electric_net": 20,
+                "other_net": 0,
+                "creation_date": "2022-02-02",
+                "added_date": "2022-02-21",
+                "number": "10",
+                "description": "Kosztorys wstępny",
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Kosztorys wstępny")
+        self.assertEqual(CostEstimate.objects.last().description, "Kosztorys wstępny")
