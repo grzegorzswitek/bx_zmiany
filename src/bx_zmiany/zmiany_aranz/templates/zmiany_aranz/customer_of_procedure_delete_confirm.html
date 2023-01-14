@@ -1,5 +1,9 @@
-Czy na pewno usunąć klienta?<br>
-<form method="post">
-    {% csrf_token %}
-    <input type="submit" value="Usuń">
-</form>
+{% extends 'base.html' %}
+
+{% block content %}
+    Czy na pewno usunąć klienta?<br>
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="Usuń">
+    </form>
+{% endblock content %}
