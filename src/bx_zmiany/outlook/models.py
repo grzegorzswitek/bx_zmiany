@@ -11,6 +11,7 @@ def signature_path():
 class Signature(models.Model):
     """Model definition for Signature in message."""
 
+    name = models.CharField(max_length=50, unique=True)
     path = models.FilePathField(
         path=signature_path(), match=".*\.txt", null=True, blank=True
     )
@@ -36,4 +37,19 @@ class Signature(models.Model):
 
     def __str__(self):
         """Unicode representation of Signature."""
-        return f"{self.path} {'(default)' if self.default else ''}".strip()
+        return f"{self.name} {'(default)' if self.default else ''}".strip()
+
+    def get_content(self):
+        if self.path:
+            try:
+                with open(
+                    self.path,
+                    encoding="utf16",
+                ) as f:
+                    return f.read().strip()
+            except FileNotFoundError:
+                raise
+        elif self.text:
+            return self.text.strip()
+        else:
+            return ""
