@@ -1,15 +1,16 @@
 import win32com.client as win32
 from typing import *
 from os import path
-import traceback
-import sys
+import logging
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
-outlook: win32.CDispatch = win32.Dispatch(
-    "Outlook.Application"
-)  # .GetNamespace("MAPI") ??
+from .models import Signature
+
+logging.basicConfig(level=logging.INFO)
+
+outlook: win32.CDispatch = win32.Dispatch("Outlook.Application")
 
 
 class Message:
@@ -22,6 +23,7 @@ class Message:
         body: str = "",
         body_format: int = 2,
         attachments: list = [],
+        signature_name: str = "",
     ) -> None:
         """Initialize Message instance
 
@@ -45,8 +47,11 @@ class Message:
         self.body = body
         self.body_format = body_format
         self.attachments = attachments
+        self.signature = signature_name
 
     def _validate_recipients(self, recipients):
+        """Checks if the recipients are defined as a list of tuples
+        and if the e-mail address format is correct."""
         if not isinstance(recipients, list):
             raise TypeError(f"argument must be a list, not {type(recipients).__name__}")
         if not recipients:
@@ -58,9 +63,15 @@ class Message:
             try:
                 validate_email(email_address)
             except ValidationError as e:
-                raise ValidationError(f"Bad e-mail address: {email_address}.") from e
+                raise ValidationError(f"Bad e-mail address: {email_address!r}.") from e
 
     def _make_recipients(self, recipients):
+        """Make a list of recipients
+
+        Examples:
+            >>> self._make_recipients([("Grzegorz Świtek", "switek@budlex.pl")])
+            ["Grzegorz Świtek<switek@budlex.pl>"]
+        """
         self._validate_recipients(recipients)
         result = []
         for recipient in recipients:
@@ -98,6 +109,7 @@ class Message:
 
     @subject.setter
     def subject(self, subject):
+        """Sets a 'subject' parameter. Subject must be less than 79 characters."""
         if not isinstance(subject, str):
             raise TypeError(
                 f"'subject' argument must be a str, not {type(subject).__name__}"
@@ -152,15 +164,61 @@ class Message:
                 )
         self.__attachments = attachments
 
-    def _get_signature(self):
-        pass
+    @property
+    def signature(self):
+        return self.__signature
+
+    @signature.setter
+    def signature(self, signature_name):
+        if not isinstance(signature_name, str):
+            raise TypeError(
+                f"'signature_name' argument must be a str, not {type(signature_name).__name__}."
+            )
+        if signature_name:
+            try:
+                signature_obj = Signature.objects.get(name=signature_name)
+                logging.info(f"Znaleziono podpis '{signature_name}'")
+            except Signature.DoesNotExist:
+                logging.warning("Nie znaleziono obiektu")
+                self.__signature = ""
+                return
+        else:
+            try:
+                signature_obj = Signature.objects.get(default=True)
+                logging.info(f"Znaleziono podpis domyślny")
+            except Signature.DoesNotExist:
+                logging.warning("Brak domyślnego obiektu")
+                self.__signature = ""
+                return
+        try:
+            self.__signature = signature_obj.get_content()
+        except:
+            logging.warning("Message.get_content() was failed.")
+            self.__signature = ""
+            return
+
+        if self.body_format == 2:
+            self.__signature = self.__signature.replace("\r\n", "<br>").replace(
+                "\n", "<br>"
+            )
+
+    def _add_signature_to_body(self):
+        if not self.signature:
+            return
+        index = self.body.find("</body>")
+        if index > 0:
+            self.body = self.body[:index] + self.signature + self.body[index:]
+        else:
+            body = body.strip() + f"{self.signature}"
 
     def create(self):
+        """Create an e-mail instance but not display."""
         mail_item = outlook.CreateItem(0)
         mail_item.To = ";".join(self.to)
         mail_item.CC = ";".join(self.cc)
         mail_item.BCC = ";".join(self.bcc)
         mail_item.Subject = self.subject
+        self._add_signature_to_body()
         if self.body_format == 2:
             mail_item.HTMLBody = self.body
         else:
@@ -171,26 +229,5 @@ class Message:
         self._mail_item = mail_item
 
     def display(self):
+        """Display an e-mail instance."""
         self._mail_item.Display()
-
-
-def main():
-    mess = Message(
-        [("Grzegorz Świtek", "switek.budlex.pl")],
-        [("Grzegorz Świtek", "switek@gmail.com")],
-        [("Grzegorz Świtek", "switek@o2.pl")],
-        "Temat",
-        "<b>Treść wiadomości</b>",
-        2,
-        [
-            r"D:\Users\gswitek\Documents\01 ZMIANY\Dan  e Klienta.pdf",
-            r"D:\Users\gswitek\Documents\01 ZMIANY\Instrukcja wprowadzania zmian aranżacyjnych - Olsztyn.pdf",
-        ],
-    )
-    mess.create()
-    mess.display()
-
-
-if __name__ == "__main__":
-    # main()
-    print(type(outlook))
