@@ -121,6 +121,25 @@ class Procedure(models.Model):
     def __str__(self) -> str:
         return self.number
 
+    @property
+    def building(self):
+        premises_first = self.premises.first()
+        if premises_first is None:
+            return None
+        return premises_first.building
+
+    @property
+    def investment_stage(self):
+        if self.building is None:
+            return None
+        return self.building.investment_stage
+
+    @property
+    def investment(self):
+        if self.investment_stage is None:
+            return None
+        return self.investment_stage.investment
+
 
 # Klient procedury
 class CustomerOfProcedure(models.Model):
