@@ -16,9 +16,9 @@ outlook: win32.CDispatch = win32.Dispatch("Outlook.Application")
 class Message:
     def __init__(
         self,
-        to: List[Tuple[str, str]] = [],
-        cc: List[Tuple[str, str]] = [],
-        bcc: List[Tuple[str, str]] = [],
+        to: List[str] = [],
+        cc: List[str] = [],
+        bcc: List[str] = [],
         subject: str = "",
         body: str = "",
         body_format: int = 2,
@@ -28,9 +28,9 @@ class Message:
         """Initialize Message instance
 
         Args:
-            to (List[Tuple[str, str, str]], optional): list of to recipients tuple [(name, email), (...)].
-            cc (List[Tuple[str, str, str]], optional): list of cc recipients tuple [(name, email), (...)].
-            bcc (List[Tuple[str, str, str]], optional): list of bcc recipients tuple [(name, email), (...)].
+            to (List[str], optional): list of to recipients ["John Doe <user@example.com>", ...].
+            cc (List[str], optional): list of cc recipients ["John Doe <user@example.com>", ...].
+            bcc (List[str], optional): list of bcc recipients ["John Doe <user@example.com>", ...].
             subject (str, optional): Message subject. Defaults to "".
             body (str, optional): Message body. Defaults to "".
             body_format (int, optional): Format of message body
@@ -50,34 +50,29 @@ class Message:
         self.signature = signature_name
 
     def _validate_recipients(self, recipients):
-        """Checks if the recipients are defined as a list of tuples
+        """Checks if the recipients are defined as a list of str
         and if the e-mail address format is correct."""
         if not isinstance(recipients, list):
             raise TypeError(f"argument must be a list, not {type(recipients).__name__}")
         if not recipients:
             return
+        if not all([isinstance(recipient, str) for recipient in recipients]):
+            raise TypeError("recipient must be a str")
+
+        import re
+
+        pattern = "<(.*)>"
         for recipient in recipients:
-            if not [type(field) for field in recipient] == [str, str]:
-                raise TypeError("recipient must be a tuple of str")
-            *_, email_address = recipient
+            match = re.search(pattern, recipient)
+            if match is None:
+                email_address = recipient
+            else:
+                email_address = match.groups()[0]
             try:
                 validate_email(email_address)
             except ValidationError as e:
                 raise ValidationError(f"Bad e-mail address: {email_address!r}.") from e
-
-    def _make_recipients(self, recipients):
-        """Make a list of recipients
-
-        Examples:
-            >>> self._make_recipients([("Grzegorz Świtek", "switek@budlex.pl")])
-            ["Grzegorz Świtek<switek@budlex.pl>"]
-        """
-        self._validate_recipients(recipients)
-        result = []
-        for recipient in recipients:
-            name, e_mail = recipient
-            result.append(f"{name}<{e_mail}>".strip())
-        return result
+        return recipients
 
     @property
     def to(self):
@@ -85,7 +80,7 @@ class Message:
 
     @to.setter
     def to(self, recipients):
-        self.__to = self._make_recipients(recipients)
+        self.__to = self._validate_recipients(recipients)
 
     @property
     def cc(self):
@@ -93,7 +88,7 @@ class Message:
 
     @cc.setter
     def cc(self, recipients):
-        self.__cc = self._make_recipients(recipients)
+        self.__cc = self._validate_recipients(recipients)
 
     @property
     def bcc(self):
@@ -101,7 +96,7 @@ class Message:
 
     @bcc.setter
     def bcc(self, recipients):
-        self.__bcc = self._make_recipients(recipients)
+        self.__bcc = self._validate_recipients(recipients)
 
     @property
     def subject(self):

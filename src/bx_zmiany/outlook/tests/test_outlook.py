@@ -27,34 +27,34 @@ class MessageTests(TestCase):
         self.message = Message()
 
     def test_recipients_valid(self):
-        self.message.to = [("User 11", "user@mail.com"), ("User 12", "user2@mail.com")]
-        self.message.cc = [("User 21", "user@mail.com"), ("User 22", "user2@mail.com")]
-        self.message.bcc = [("User 31", "user@mail.com"), ("User 32", "user2@mail.com")]
+        self.message.to = ["User 11 <user@mail.com>", "User 12 <user2@mail.com>"]
+        self.message.cc = ["User 21 <user@mail.com>", "User 22 <user2@mail.com>"]
+        self.message.bcc = ["User 31 <user@mail.com>", "User 32 <user2@mail.com>"]
         self.assertEqual(
-            self.message.to, ["User 11<user@mail.com>", "User 12<user2@mail.com>"]
+            self.message.to, ["User 11 <user@mail.com>", "User 12 <user2@mail.com>"]
         )
         self.assertEqual(
-            self.message.cc, ["User 21<user@mail.com>", "User 22<user2@mail.com>"]
+            self.message.cc, ["User 21 <user@mail.com>", "User 22 <user2@mail.com>"]
         )
         self.assertEqual(
-            self.message.bcc, ["User 31<user@mail.com>", "User 32<user2@mail.com>"]
+            self.message.bcc, ["User 31 <user@mail.com>", "User 32 <user2@mail.com>"]
         )
 
     def test_recipients_invalid_address_format(self):
         with self.assertRaises(ValidationError):
             self.message.to = [
-                ("User 1", "user@mail.com"),
-                ("User 2", "user2.mail.com"),
+                "User 1 <user@mail.com>",
+                "User 2 <user2.mail.com>",
             ]
         with self.assertRaises(ValidationError):
             self.message.cc = [
-                ("User 1", "user@mail.com"),
-                ("User 2", "user2.mail.com"),
+                "User 1 <user@mail.com>",
+                "User 2 <user2.mail.com>",
             ]
         with self.assertRaises(ValidationError):
             self.message.bcc = [
-                ("User 1", "user@mail.com"),
-                ("User 2", "user2.mail.com"),
+                "User 1 <user@mail.com>",
+                "User 2 <user2.mail.com>",
             ]
 
     def test_subject_valid(self):
