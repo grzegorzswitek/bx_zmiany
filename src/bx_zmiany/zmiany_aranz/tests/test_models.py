@@ -161,6 +161,14 @@ class PersonTests(TestCase):
         self.assertEqual(str(obj11), expected_str11)
         self.assertEqual(str(obj12), expected_str12)
 
+    def test_email_recipient_property(self):
+        person = Person.objects.create(
+            first_name="Jan", last_name="Kowalski", e_mail="user@example.com"
+        )
+        self.assertEqual(person.email_recipient, "Jan Kowalski <user@example.com>")
+        person = Person.objects.create()
+        self.assertEqual(person.email_recipient, "")
+
 
 class CustomerTest(TestCase):
     def test_customer_str(self):

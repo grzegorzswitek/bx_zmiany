@@ -276,6 +276,12 @@ class PersonAbstract(models.Model):
         """Unicode representation of PersonAbstract."""
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
+    @property
+    def email_recipient(self):
+        if not self.e_mail:
+            return ""
+        return f"{self.first_name} {self.last_name} <{self.e_mail}>".strip()
+
 
 # Osoba
 class Person(PersonAbstract):
