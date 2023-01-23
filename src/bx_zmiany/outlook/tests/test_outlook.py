@@ -143,3 +143,58 @@ class MessageTests(TestCase):
             self.message.body_format = body_format
             self.message.signature = ""
             self.assertEqual(self.message.signature, signature_content)
+
+    def test_correct_addresses(self):
+        for field in ("to", "cc", "bcc"):
+            value = ["user@example.com", "user2@example.com"]
+            setattr(self.message, field, value)
+            self.assertEqual(getattr(self.message, field), value)
+            value = ["user@example.com", ""]
+            setattr(self.message, field, value)
+            self.assertEqual(getattr(self.message, field), value)
+            value = [""]
+            setattr(self.message, field, value)
+            self.assertEqual(getattr(self.message, field), value)
+
+    def test_incorrect_addresses(self):
+        for field in ("to", "cc", "bcc"):
+            with self.assertRaises(TypeError):
+                value = "user@example.com"
+                setattr(self.message, field, value)
+            with self.assertRaises(TypeError):
+                value = ["user@example.com", 123]
+                setattr(self.message, field, value)
+            with self.assertRaises(ValidationError):
+                value = ["user.example.com"]
+                setattr(self.message, field, value)
+
+    def test_incorrect_body_format(self):
+        for value in ("1", [], None, 1.0):
+            with self.assertRaises(TypeError):
+                self.message.body_format = value
+        with self.assertRaises(ValueError):
+            self.message.body_format = 4
+
+    def test_add_signature(self):
+        message_body_txt = "Test body message.\n"
+        message_body_html = "<body>Test body message.<br>Second line.<br></body>"
+        signature_content = "Best regards,\nJan Kowalski"
+        expected_message_body_txt = "Test body message.Best regards,\nJan Kowalski"
+        expected_message_body_html = "<body>Test body message.<br>Second line.<br>Best regards,<br>Jan Kowalski</body>"
+        signature_name = "test"
+        Signature.objects.create(
+            name=signature_name,
+            text=signature_content,
+        )
+        for body_format in (0, 1, 3):
+            self.message.body = message_body_txt
+            self.message.body_format = body_format
+            self.message.signature = signature_name
+            self.message._add_signature_to_body()
+            self.assertEqual(self.message.body, expected_message_body_txt)
+        for body_format in (2,):
+            self.message.body = message_body_html
+            self.message.body_format = body_format
+            self.message.signature = signature_name
+            self.message._add_signature_to_body()
+            self.assertEqual(self.message.body, expected_message_body_html)
