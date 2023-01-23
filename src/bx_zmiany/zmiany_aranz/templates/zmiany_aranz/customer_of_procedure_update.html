@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
+{% load bootstrap %}
 
-{% load tailwind_filters %}
 
 {% block content %}
     <form method="post">
         {% csrf_token %}
         <table>
-            {{ form|crispy }}
+            {{ form|bootstrap }}
         </table>
         <input type="submit" value="Zapisz">
     </form>
