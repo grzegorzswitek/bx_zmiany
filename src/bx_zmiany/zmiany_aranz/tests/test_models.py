@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
@@ -66,16 +68,12 @@ class ProcedureTests(TestCase):
         Procedure.objects.create()
 
     def test_procedure_number_one(self):
-        from datetime import date
-
         current_year = date.today().year
         expected_number = f"001/{str(current_year)[-2:]}"
         procedure = Procedure.objects.get(pk=1)
         self.assertEqual(procedure.number, expected_number)
 
     def test_procedure_number_two(self):
-        from datetime import date
-
         current_year = date.today().year
         expected_number = f"002/{str(current_year)[-2:]}"
         procedure = Procedure.objects.get(pk=2)
@@ -119,47 +117,41 @@ class KindOfPremisesTests(TestCase):
 
 class PersonTests(TestCase):
     def test_person_str(self):
-        obj1 = Person(
-            first_name="Jan",
-            last_name="Kowalski",
-            role="Kierownik budowy",
-            company="LECH",
+        objects = (
+            Person(
+                first_name="Jan",
+                last_name="Kowalski",
+                role="Kierownik budowy",
+                company="LECH",
+            ),
+            Person(first_name="Jan", last_name="Kowalski", role="Kierownik budowy"),
+            Person(first_name="Jan", last_name="Kowalski", company="LECH"),
+            Person(first_name="Jan", last_name="Kowalski"),
+            Person(first_name="Jan"),
+            Person(last_name="Kowalski"),
+            Person(first_name="Jan", role="Kierownik budowy", company="LECH"),
+            Person(first_name="Jan", role="Kierownik budowy"),
+            Person(first_name="Jan", company="LECH"),
+            Person(last_name="Kowalski", role="Kierownik budowy", company="LECH"),
+            Person(last_name="Kowalski", role="Kierownik budowy"),
+            Person(last_name="Kowalski", company="LECH"),
         )
-        obj2 = Person(first_name="Jan", last_name="Kowalski", role="Kierownik budowy")
-        obj3 = Person(first_name="Jan", last_name="Kowalski", company="LECH")
-        obj4 = Person(first_name="Jan", last_name="Kowalski")
-        obj5 = Person(first_name="Jan")
-        obj6 = Person(last_name="Kowalski")
-        obj7 = Person(first_name="Jan", role="Kierownik budowy", company="LECH")
-        obj8 = Person(first_name="Jan", role="Kierownik budowy")
-        obj9 = Person(first_name="Jan", company="LECH")
-        obj10 = Person(last_name="Kowalski", role="Kierownik budowy", company="LECH")
-        obj11 = Person(last_name="Kowalski", role="Kierownik budowy")
-        obj12 = Person(last_name="Kowalski", company="LECH")
-        expected_str1 = "Jan Kowalski (LECH - Kierownik budowy)"
-        expected_str2 = "Jan Kowalski (Kierownik budowy)"
-        expected_str3 = "Jan Kowalski (LECH)"
-        expected_str4 = "Jan Kowalski"
-        expected_str5 = "Jan"
-        expected_str6 = "Kowalski"
-        expected_str7 = "Jan (LECH - Kierownik budowy)"
-        expected_str8 = "Jan (Kierownik budowy)"
-        expected_str9 = "Jan (LECH)"
-        expected_str10 = "Kowalski (LECH - Kierownik budowy)"
-        expected_str11 = "Kowalski (Kierownik budowy)"
-        expected_str12 = "Kowalski (LECH)"
-        self.assertEqual(str(obj1), expected_str1)
-        self.assertEqual(str(obj2), expected_str2)
-        self.assertEqual(str(obj3), expected_str3)
-        self.assertEqual(str(obj4), expected_str4)
-        self.assertEqual(str(obj5), expected_str5)
-        self.assertEqual(str(obj6), expected_str6)
-        self.assertEqual(str(obj7), expected_str7)
-        self.assertEqual(str(obj8), expected_str8)
-        self.assertEqual(str(obj9), expected_str9)
-        self.assertEqual(str(obj10), expected_str10)
-        self.assertEqual(str(obj11), expected_str11)
-        self.assertEqual(str(obj12), expected_str12)
+        expected_strings = (
+            "Jan Kowalski (LECH - Kierownik budowy)",
+            "Jan Kowalski (Kierownik budowy)",
+            "Jan Kowalski (LECH)",
+            "Jan Kowalski",
+            "Jan",
+            "Kowalski",
+            "Jan (LECH - Kierownik budowy)",
+            "Jan (Kierownik budowy)",
+            "Jan (LECH)",
+            "Kowalski (LECH - Kierownik budowy)",
+            "Kowalski (Kierownik budowy)",
+            "Kowalski (LECH)",
+        )
+        for obj, expected_str in zip(objects, expected_strings):
+            self.assertEqual(str(obj), expected_str)
 
     def test_email_recipient_property(self):
         person = Person.objects.create(
@@ -172,19 +164,26 @@ class PersonTests(TestCase):
 
 class CustomerTest(TestCase):
     def test_customer_str(self):
-        obj1 = Customer(first_name="Jan", last_name="Kowalski")
-        obj2 = Customer(first_name="Jan")
-        obj3 = Customer(last_name="Kowalski")
-        expected_str1 = "Jan Kowalski"
-        expected_str2 = "Jan"
-        expected_str3 = "Kowalski"
-        self.assertEqual(str(obj1), expected_str1)
-        self.assertEqual(str(obj2), expected_str2)
-        self.assertEqual(str(obj3), expected_str3)
+        objects = (
+            Customer(first_name="Jan", last_name="Kowalski"),
+            Customer(first_name="Jan"),
+            Customer(last_name="Kowalski"),
+        )
+        expected_strings = (
+            "Jan Kowalski",
+            "Jan",
+            "Kowalski",
+        )
+        for obj, expected_str in zip(objects, expected_strings):
+            self.assertEqual(str(obj), expected_str)
 
 
 class CustomerHandlerTest(TestCase):
     def test_customer_handler_str(self):
+        objects = ()
+        expected_strings = ()
+        for obj, expected_str in zip(objects, expected_strings):
+            self.assertEqual(str(obj), expected_str)
         obj1 = CustomerHandler(first_name="Jan", last_name="Kowalski")
         obj2 = CustomerHandler(first_name="Jan")
         obj3 = CustomerHandler(last_name="Kowalski")
@@ -198,51 +197,54 @@ class CustomerHandlerTest(TestCase):
 
 class CostEstimateTest(TestCase):
     def test_cost_estimete_str(self):
-        obj1 = CostEstimate(
-            file_name="T2-M39B - Kosztorys.pdf",
-            net=1000.4,
-            vat=80,
-            gross=1080,
-            construction_net=0,
-            sanitary_net=0,
-            electric_net=0,
-            other_net=0,
-            creation_date="2022-02-02",
-            number="1",
-            description="kosztorys wstępny",
+        objects = (
+            CostEstimate(
+                file_name="T2-M39B - Kosztorys.pdf",
+                net=1000.4,
+                vat=80,
+                gross=1080,
+                construction_net=0,
+                sanitary_net=0,
+                electric_net=0,
+                other_net=0,
+                creation_date="2022-02-02",
+                number="1",
+                description="kosztorys wstępny",
+            ),
+            CostEstimate(
+                file_name=None,
+                net=1000.4,
+                vat=80,
+                gross=1080,
+                construction_net=0,
+                sanitary_net=0,
+                electric_net=0,
+                other_net=0,
+                creation_date="2022-02-02",
+                number="1",
+                description="kosztorys wstępny",
+            ),
+            CostEstimate(
+                file_name=None,
+                net=1000.4,
+                vat=80,
+                gross=1080,
+                construction_net=0,
+                sanitary_net=0,
+                electric_net=0,
+                other_net=0,
+                creation_date="2022-02-02",
+                number="1",
+                description=None,
+            ),
         )
-        obj2 = CostEstimate(
-            file_name=None,
-            net=1000.4,
-            vat=80,
-            gross=1080,
-            construction_net=0,
-            sanitary_net=0,
-            electric_net=0,
-            other_net=0,
-            creation_date="2022-02-02",
-            number="1",
-            description="kosztorys wstępny",
+        expected_strings = (
+            "T2-M39B - Kosztorys.pdf; 1000.40; kosztorys wstępny",
+            "1000.40; kosztorys wstępny",
+            "1000.40",
         )
-        obj3 = CostEstimate(
-            file_name=None,
-            net=1000.4,
-            vat=80,
-            gross=1080,
-            construction_net=0,
-            sanitary_net=0,
-            electric_net=0,
-            other_net=0,
-            creation_date="2022-02-02",
-            number="1",
-            description=None,
-        )
-        expected_str1 = "T2-M39B - Kosztorys.pdf; 1000.40; kosztorys wstępny"
-        expected_str2 = "1000.40; kosztorys wstępny"
-        expected_str3 = "1000.40"
-        self.assertEqual(str(obj1), expected_str1)
-        self.assertEqual(str(obj2), expected_str2)
-        self.assertEqual(str(obj3), expected_str3)
+        for obj, expected_str in zip(objects, expected_strings):
+            self.assertEqual(str(obj), expected_str)
 
 
 class CostEstimateOfProcedureTest(TestCase):
@@ -268,38 +270,41 @@ class CostEstimateOfProcedureTest(TestCase):
 
 class InvoiceTest(TestCase):
     def test_invoice_str(self):
-        obj1 = Invoice(
-            number="1/2022",
-            invoice_date="2022-02-02",
-            due_date="2022-02-16",
-            net=100,
-            vat=8,
-            gross=108,
+        objects = (
+            Invoice(
+                number="1/2022",
+                invoice_date="2022-02-02",
+                due_date="2022-02-16",
+                net=100,
+                vat=8,
+                gross=108,
+            ),
+            Invoice(
+                number="1/2022",
+                invoice_date="2022-02-02",
+                due_date="2022-02-16",
+                net=100,
+                vat=8,
+                gross=108,
+                paid=True,
+            ),
+            Invoice(
+                number=None,
+                invoice_date="2022-02-02",
+                due_date="2022-02-16",
+                net=100,
+                vat=8,
+                gross=108,
+                paid=True,
+            ),
         )
-        obj2 = Invoice(
-            number="1/2022",
-            invoice_date="2022-02-02",
-            due_date="2022-02-16",
-            net=100,
-            vat=8,
-            gross=108,
-            paid=True,
+        expected_strings = (
+            "1/2022; 100.00; unpaid",
+            "1/2022; 100.00; paid",
+            "100.00; paid",
         )
-        obj3 = Invoice(
-            number=None,
-            invoice_date="2022-02-02",
-            due_date="2022-02-16",
-            net=100,
-            vat=8,
-            gross=108,
-            paid=True,
-        )
-        expected_str1 = "1/2022; 100.00; unpaid"
-        expected_str2 = "1/2022; 100.00; paid"
-        expected_str3 = "100.00; paid"
-        self.assertEqual(str(obj1), expected_str1)
-        self.assertEqual(str(obj2), expected_str2)
-        self.assertEqual(str(obj3), expected_str3)
+        for obj, expected_str in zip(objects, expected_strings):
+            self.assertEqual(str(obj), expected_str)
 
 
 class CostTest(TestCase):

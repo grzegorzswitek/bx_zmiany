@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import setup_test_environment
@@ -371,15 +374,17 @@ class ProcedureCustomersListTests(TestCase):
     def setUp(self):
         self.procedure_1 = Procedure.objects.create()
         self.procedure_2 = Procedure.objects.create()
-        self.customer_1 = Customer.objects.create(
-            first_name="Anna",
-            last_name="Kowalska",
+        customers = (
+            Customer.objects.create(
+                first_name="Anna",
+                last_name="Kowalska",
+            ),
+            Customer.objects.create(
+                first_name="Jan",
+                last_name="Kowalski",
+            ),
         )
-        self.customer_2 = Customer.objects.create(
-            first_name="Jan",
-            last_name="Kowalski",
-        )
-        self.procedure_1.customers.set([self.customer_1, self.customer_2])
+        self.procedure_1.customers.set(customers)
 
     def test_procedure_with_customers(self):
         response = self.client.get(
