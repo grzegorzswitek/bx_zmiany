@@ -1,7 +1,8 @@
-import win32com.client as win32
 from typing import *
 from os import path
 import logging
+
+import win32com.client as win32
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -9,8 +10,6 @@ from django.core.validators import validate_email
 from .models import Signature
 
 logging.basicConfig(level=logging.INFO)
-
-outlook: win32.CDispatch = win32.Dispatch("Outlook.Application")
 
 
 class Message:
@@ -55,7 +54,7 @@ class Message:
         if not isinstance(recipients, list):
             raise TypeError(f"argument must be a list, not {type(recipients).__name__}")
         if not recipients:
-            return
+            return []
         if not all([isinstance(recipient, str) for recipient in recipients]):
             raise TypeError("recipient must be a str")
 
@@ -68,6 +67,8 @@ class Message:
                 email_address = recipient
             else:
                 email_address = match.groups()[0]
+            if not email_address:
+                continue
             try:
                 validate_email(email_address)
             except ValidationError as e:
@@ -204,10 +205,11 @@ class Message:
         if index > 0:
             self.body = self.body[:index] + self.signature + self.body[index:]
         else:
-            body = body.strip() + f"{self.signature}"
+            self.body = self.body.strip() + f"{self.signature}"
 
     def create(self):
         """Create an e-mail instance but not display."""
+        outlook: win32.CDispatch = win32.Dispatch("Outlook.Application")
         mail_item = outlook.CreateItem(0)
         mail_item.To = ";".join(self.to)
         mail_item.CC = ";".join(self.cc)
