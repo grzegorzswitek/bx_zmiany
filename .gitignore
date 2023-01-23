@@ -310,6 +310,7 @@ $RECYCLE.BIN/
 run_server.bat
 run_shell.bat
 run_venv.bat
+run_chrome.bat
 script_server.bat
 script_shell.bat
 script_venv.bat
