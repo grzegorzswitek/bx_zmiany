@@ -26,6 +26,7 @@ from .models import (
     CustomerOfProcedure,
     CostEstimate,
     EmailAction,
+    InvestmentStage,
     InvestmentStagePerson,
 )
 from .forms import SendEmailForm
@@ -46,6 +47,16 @@ class ProcedureDetailView(DetailView):
 
     model = Procedure
     template_name = f"{APP_NAME}/procedure.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context_data = super().get_context_data(**kwargs)
+        investment_stage = self.object.investment_stage
+        if isinstance(investment_stage, InvestmentStage):
+            email_actions = EmailAction.objects.filter(
+                investment_stage=investment_stage.pk
+            )
+            context_data.update({"email_actions": email_actions})
+        return context_data
 
 
 class ProcedureSubpagesAbstractListView(ListView):
@@ -460,12 +471,18 @@ class SendEmailView(View):
         recipients = action.get_recipients()
         procedure_replacer = Replacer(procedure)
         attachment_seq = action.get_attachments_to_form(procedure)
+        mail_subject, mail_body = [
+            procedure_replacer(getattr(action, field))
+            if getattr(action, field) is not None
+            else ""
+            for field in ["mail_subject", "mail_body"]
+        ]
         initial = {
             "to": "\r\n".join(recipients["to"]),
             "cc": "\r\n".join(recipients["cc"]),
             "bcc": "\r\n".join(recipients["bcc"]),
-            "subject": procedure_replacer(action.mail_subject),
-            "body": procedure_replacer(action.mail_body),
+            "subject": mail_subject,
+            "body": mail_body,
             "attachments": [id for (id, _) in attachment_seq],
         }
         form = self.form_class(initial=initial, attachments_choices=attachment_seq)
