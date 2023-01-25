@@ -1,5 +1,5 @@
 from typing import *
-from os import path
+import os.path
 from glob import glob
 
 from django.db import models
@@ -582,20 +582,25 @@ class EmailAction(models.Model):
             raise TypeError(
                 f"procedure must be a Procedure instance, not {procedure.__class__.__name__}."
             )
-        root_dir = path.abspath(procedure.directory)
-        if not path.isdir(root_dir):
+        root_dir = os.path.abspath(procedure.directory)
+        if not os.path.isdir(root_dir):
             raise ValueError(
                 "Path is incorrect. Expected path to root directory of procedure."
             )
         procedure_replacer = Replacer(procedure)
-        path_patterns = [line.strip() for line in self.mail_attachments.split("\r\n")]
+        path_patterns = [
+            line
+            for line in [line.strip() for line in self.mail_attachments.split("\r\n")]
+            if line
+        ]
         abs_path_patterns = [
-            procedure_replacer(path.join(root_dir, pattern))
+            procedure_replacer(os.path.join(root_dir, pattern))
             for pattern in path_patterns
         ]
         paths = []
         for _path in abs_path_patterns:
             paths.extend(glob(_path))
+        paths = [path for path in paths if os.path.isfile(path)]
         hash_list = [str(hash(path))[-6:] for path in paths]
         if relative:
             paths = [p[len(root_dir) :].strip(r"\/ ") for p in paths]
