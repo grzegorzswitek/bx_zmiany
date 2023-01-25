@@ -1,0 +1,273 @@
+[
+    {
+        "model": "zmiany_aranz.customuser",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$390000$NbSTt5uBmvDWAR4V54hOWI$ompzB/J/93a30SVxFSkoO6zgD4pDVlqk6oYwJkYuu5s=",
+            "last_login": "2023-01-23T21:30:03Z",
+            "is_superuser": true,
+            "first_name": "Grzegorz",
+            "last_name": "Świtek",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2023-01-23T21:29:56Z",
+            "email": "switek@budlex.pl",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "zmiany_aranz.procedure",
+        "pk": 1,
+        "fields": {
+            "_number": 1,
+            "_year": "2023",
+            "status": 0,
+            "invoice_status": 0,
+            "invoice_month": null,
+            "gross_fee_for_arran_changes": "650.00",
+            "accepted": false,
+            "directory": null,
+            "comment": "",
+            "premises": [
+                1
+            ],
+            "persons": [],
+            "customer_handler": [
+                1
+            ],
+            "invoices": [
+                1
+            ],
+            "costs": [
+                1
+            ]
+        }
+    },
+    {
+        "model": "zmiany_aranz.customerofprocedure",
+        "pk": 1,
+        "fields": {
+            "procedure": 1,
+            "customer": 2,
+            "shares": 0.5
+        }
+    },
+    {
+        "model": "zmiany_aranz.customerofprocedure",
+        "pk": 2,
+        "fields": {
+            "procedure": 1,
+            "customer": 1,
+            "shares": 0.5
+        }
+    },
+    {
+        "model": "zmiany_aranz.investment",
+        "pk": 1,
+        "fields": {
+            "symbol": "URZ",
+            "name": "Urzecze"
+        }
+    },
+    {
+        "model": "zmiany_aranz.investmentstage",
+        "pk": 1,
+        "fields": {
+            "investment": 1,
+            "symbol": "URZ-N",
+            "name": "Urzecze Naruszewicza",
+            "number_of_flats": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.building",
+        "pk": 1,
+        "fields": {
+            "investment_stage": 1,
+            "symbol": "URZ-N-A",
+            "name": "Urzecze Naruszewicza bud. A",
+            "location_desc": "Bydgoszcz, ul. Naruszewicza, budynek A"
+        }
+    },
+    {
+        "model": "zmiany_aranz.premises",
+        "pk": 1,
+        "fields": {
+            "id_crm": null,
+            "symbol": "URZ-N-M39B",
+            "building": 1,
+            "kind": 1,
+            "staircase": null,
+            "storey": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.kindofpremises",
+        "pk": 1,
+        "fields": {
+            "symbol": "LM",
+            "name": "lokal mieszkalny",
+            "description": ""
+        }
+    },
+    {
+        "model": "zmiany_aranz.person",
+        "pk": 1,
+        "fields": {
+            "first_name": "Adam",
+            "last_name": "Kwiatkowski",
+            "phone": null,
+            "e_mail": "gw1@company.com",
+            "company": null,
+            "role": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.person",
+        "pk": 2,
+        "fields": {
+            "first_name": "Jerzy",
+            "last_name": "Kowalski",
+            "phone": null,
+            "e_mail": "gw2@company.com",
+            "company": null,
+            "role": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.person",
+        "pk": 3,
+        "fields": {
+            "first_name": "Anna",
+            "last_name": "Sadowska",
+            "phone": null,
+            "e_mail": "gw3@company.com",
+            "company": null,
+            "role": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.customer",
+        "pk": 1,
+        "fields": {
+            "first_name": "Jan",
+            "last_name": "Kowalski",
+            "phone": "123456789",
+            "e_mail": "customer1@example.com",
+            "id_crm": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.customer",
+        "pk": 2,
+        "fields": {
+            "first_name": "Anna",
+            "last_name": "Kowalska",
+            "phone": "789456123",
+            "e_mail": "customer2@example.com",
+            "id_crm": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.customerhandler",
+        "pk": 1,
+        "fields": {
+            "first_name": "Ewa",
+            "last_name": "AC1",
+            "phone": null,
+            "e_mail": "dh1@company.com",
+            "branch": 1
+        }
+    },
+    {
+        "model": "zmiany_aranz.costestimate",
+        "pk": 1,
+        "fields": {
+            "file_name": null,
+            "net": "1000.00",
+            "vat": "80.00",
+            "gross": "1080.00",
+            "construction_net": "500.00",
+            "sanitary_net": "300.00",
+            "electric_net": "200.00",
+            "other_net": "0.00",
+            "creation_date": "2023-01-23",
+            "added_date": "2023-01-23T21:37:52.213Z",
+            "number": null,
+            "description": ""
+        }
+    },
+    {
+        "model": "zmiany_aranz.costestimate",
+        "pk": 2,
+        "fields": {
+            "file_name": null,
+            "net": "900.00",
+            "vat": "72.00",
+            "gross": "972.00",
+            "construction_net": "400.00",
+            "sanitary_net": "300.00",
+            "electric_net": "200.00",
+            "other_net": "0.00",
+            "creation_date": "2023-01-23",
+            "added_date": "2023-01-23T21:38:46.228Z",
+            "number": null,
+            "description": ""
+        }
+    },
+    {
+        "model": "zmiany_aranz.costestimateofprocedure",
+        "pk": 1,
+        "fields": {
+            "procedure": 1,
+            "cost_estimate": 1,
+            "for_customer": true,
+            "for_general_contractor": false
+        }
+    },
+    {
+        "model": "zmiany_aranz.costestimateofprocedure",
+        "pk": 2,
+        "fields": {
+            "procedure": 1,
+            "cost_estimate": 2,
+            "for_customer": false,
+            "for_general_contractor": true
+        }
+    },
+    {
+        "model": "zmiany_aranz.invoice",
+        "pk": 1,
+        "fields": {
+            "file": "",
+            "number": null,
+            "invoice_date": "2023-01-23",
+            "due_date": "2023-02-06",
+            "net": "100.00",
+            "vat": "8.00",
+            "gross": "108.00",
+            "description": "",
+            "paid": false
+        }
+    },
+    {
+        "model": "zmiany_aranz.cost",
+        "pk": 1,
+        "fields": {
+            "net": "500.00",
+            "vat": "115.00",
+            "gross": "615.00",
+            "name": "projekt zamienny centralnego ogrzewania",
+            "description": "",
+            "kind": 1
+        }
+    },
+    {
+        "model": "zmiany_aranz.kindofcost",
+        "pk": 1,
+        "fields": {
+            "name": "Projekt zamienny"
+        }
+    }
+]

@@ -17,6 +17,8 @@ from zmiany_aranz.models import (
     Person,
     Premises,
     Procedure,
+    EmailAction,
+    EmailActionPerson,
 )
 
 
@@ -89,6 +91,14 @@ class ProcedureAdmin(admin.ModelAdmin):
     inlines = (CustomerOfProcedureInline,)
 
 
+class EmailActionPersonInline(admin.TabularInline):
+    model = EmailActionPerson
+
+
+class EmailActionAdmin(admin.ModelAdmin):
+    inlines = (EmailActionPersonInline,)
+
+
 admin.site.register(Building, BuildingAdmin)
 admin.site.register(Cost, CostAdmin)
 admin.site.register(CostEstimate, CostEstimateAdmin)
@@ -105,3 +115,4 @@ admin.site.register(KindOfPremises, KindOfPremisesAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Premises, PremisesAdmin)
 admin.site.register(Procedure, ProcedureAdmin)
+admin.site.register(EmailAction, EmailActionAdmin)

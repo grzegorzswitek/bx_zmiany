@@ -64,6 +64,7 @@
             <li><a href="{% url 'zmiany_aranz:procedure_cost_estimates_list' procedure.pk %}">Kosztorysy</a></li>
             <li><a href="{% url 'zmiany_aranz:procedure_invoices_list' procedure.pk %}">Faktury</a></li>
             <li><a href="{% url 'zmiany_aranz:procedure_customers_list' procedure.pk %}">Klienci</a></li>
+            <li><a href="{% url 'zmiany_aranz:send_email' procedure.pk 'gw-woz' %}">Wyślij wniosek o zmiany</a></li>
         </ul>
     </p>
    

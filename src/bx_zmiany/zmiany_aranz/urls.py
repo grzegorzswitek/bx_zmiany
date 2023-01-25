@@ -22,6 +22,7 @@ from zmiany_aranz.views import (
     CustomerDetailView,
     CustomerUpdateView,
     CustomerDeleteView,
+    SendEmailView,
 )
 
 app_name = "zmiany_aranz"
@@ -136,5 +137,10 @@ urlpatterns = [
         "customer/<int:pk>/delete/",
         CustomerDeleteView.as_view(),
         name="customer_delete",
+    ),
+    path(
+        "procedure/<int:pk>/send_email/<slug:slug>/",
+        SendEmailView.as_view(),
+        name="send_email",
     ),
 ]

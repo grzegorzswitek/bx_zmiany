@@ -1,5 +1,7 @@
 import os
+import logging
 import tempfile
+from shutil import rmtree
 
 from django.urls import reverse
 from django.test import TestCase
@@ -15,9 +17,21 @@ from zmiany_aranz.models import (
     Customer,
     CustomerOfProcedure,
     CostEstimate,
+    InvestmentStage,
+    Building,
+    Premises,
+    EmailAction,
+    Person,
+    InvestmentStagePerson,
+    EmailActionPerson,
 )
 
+from zmiany_aranz.forms import SendEmailForm
+
 from zmiany_aranz.apps import ZmianyAranzConfig
+
+logger = logging.getLogger(__name__)
+logging.disable(logging.CRITICAL)
 
 APP_NAME = ZmianyAranzConfig.name
 
@@ -724,3 +738,106 @@ class CostEstimateUpdateTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Kosztorys wstępny")
         self.assertEqual(CostEstimate.objects.last().description, "Kosztorys wstępny")
+
+
+class SendEmailTests(TestCase):
+    fixtures = ["email_action.json"]
+
+    def setUp(self):
+        self.url = f"{APP_NAME}:send_email"
+        self.action_slug = "gw-woz"
+        self.directory = tempfile.mkdtemp()
+        os.mkdir(os.path.join(self.directory, "PDF po zmianach"))
+        self.abs_file_paths = [
+            os.path.join(self.directory, path)
+            for path in [
+                "URZ-N-M39B - Wniosek o zmiany aranżacyjne w mieszkaniu.pdf",
+                "URZ-N-M39B - Kosztorys.ath",
+                "URZ-N-M39B - Kosztorys.pdf",
+                "PDF po zmianach\\plik_1.pdf",
+                "PDF po zmianach\\plik_2.pdf",
+            ]
+        ]
+        for path in self.abs_file_paths:
+            with open(path, "w") as f:
+                f.write("Plik testowy")
+        self.procedure = Procedure.objects.get(pk=1)
+        self.procedure.directory = self.directory
+        self.procedure.save()
+        email_action = EmailAction.objects.get(pk=1)
+        self.attachments_ids = [
+            id
+            for id, _ in email_action._get_attachments_path_for_procedure(
+                self.procedure
+            )
+        ]
+
+    def test_GET_invalid_procedure_pk(self):
+        response = self.client.get(
+            reverse(self.url, kwargs={"pk": 0, "slug": self.action_slug})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_GET_invalid_action_slug(self):
+        response = self.client.get(
+            reverse(self.url, kwargs={"pk": self.procedure.pk, "slug": "invalid-slug"})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_GET_correct(self):
+        response = self.client.get(
+            reverse(
+                self.url, kwargs={"pk": self.procedure.pk, "slug": self.action_slug}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "form")
+        self.assertIsInstance(response.context["form"], SendEmailForm)
+        self.assertContains(response, "Anna Sadowska")
+        self.assertContains(
+            response, "URZ-N-M39B - Wniosek o zmiany aranżacyjne w mieszkaniu.pdf"
+        )
+
+    def test_POST_invalid_procedure_pk(self):
+        response = self.client.post(
+            reverse(self.url, kwargs={"pk": 0, "slug": self.action_slug})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_POST_invalid_action_slug(self):
+        response = self.client.post(
+            reverse(self.url, kwargs={"pk": self.procedure.pk, "slug": "invalid-slug"})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_POST_invalid_form(self):
+        response = self.client.post(
+            reverse(
+                self.url, kwargs={"pk": self.procedure.pk, "slug": self.action_slug}
+            ),
+            data={},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context["form"], SendEmailForm)
+
+    def test_POST_correct(self):
+        response = self.client.post(
+            reverse(
+                self.url,
+                kwargs={"pk": self.procedure.pk, "slug": self.action_slug},
+            ),
+            data={
+                "to": "user1@example.com\r\nuser2@example.com  ",
+                "cc": "user3@example.com\r\nuser4@example.com  ",
+                "bcc": "user5@example.com\r\n  ",
+                "subject": "URZ-N-M24B - Wniosek o zmiany",
+                "body": "Dzień dobry,\r\nW załączeniu przesyłam wniosek o zmiany.",
+                "attachments": self.attachments_ids,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Wiadomość została utworzona")
+
+    def tearDown(self) -> None:
+        rmtree(self.directory)
+        return super().tearDown()
