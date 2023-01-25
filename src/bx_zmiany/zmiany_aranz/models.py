@@ -549,9 +549,9 @@ class EmailAction(models.Model):
     )
     persons = models.ManyToManyField("Person", through="EmailActionPerson")
     name = models.CharField(max_length=30)
-    mail_subject = models.CharField(max_length=100)
-    mail_body = models.TextField()
-    mail_attachments = models.TextField()
+    mail_subject = models.CharField(max_length=100, null=True, blank=True)
+    mail_body = models.TextField(null=True, blank=True)
+    mail_attachments = models.TextField(null=True, blank=True)
     is_template = models.BooleanField(default=False)
     slug = models.SlugField(editable=False)
 
