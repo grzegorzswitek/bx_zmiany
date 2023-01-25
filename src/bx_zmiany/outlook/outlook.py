@@ -234,3 +234,7 @@ class Message:
     def display(self):
         """Display an e-mail instance."""
         self._mail_item.Display()
+
+    def save(self):
+        """Save an e-mail instance."""
+        self._mail_item.Save()
