@@ -1,9 +1,16 @@
+from typing import *
+from os import path
+from glob import glob
+
 from django.db import models
 from django.db.models import Max
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
+from django.template.defaultfilters import slugify
+
+from zmiany_aranz.string_replacer import Replacer
 
 from .managers import CustomUserManager
 from .apps import ZmianyAranzConfig
@@ -191,6 +198,9 @@ class InvestmentStage(models.Model):
     symbol = models.CharField(max_length=12, unique=True)
     name = models.CharField(max_length=30, unique=True)
     number_of_flats = models.PositiveIntegerField(null=True, blank=True)
+    persons = models.ManyToManyField(
+        "Person", through="InvestmentStagePerson", blank=True
+    )
 
     # link do tabeli G-Sheets?
     # link do folderu G-Drive?
@@ -503,6 +513,112 @@ class KindOfCost(models.Model):
     def __str__(self):
         """Unicode representation of KindOfCost."""
         return self.name
+
+
+class InvestmentStagePerson(models.Model):
+    """Model definition for InvestmentStagePerson."""
+
+    investment_stage = models.ForeignKey("InvestmentStage", on_delete=models.CASCADE)
+    person = models.ForeignKey("Person", on_delete=models.CASCADE)
+
+    class Meta:
+        """Meta definition for InvestmentStagePerson."""
+
+        verbose_name = "InvestmentStagePerson"
+        verbose_name_plural = "InvestmentStagePersons"
+
+    def __str__(self):
+        """Unicode representation of InvestmentStagePerson."""
+        return f"{self.person} ({self.investment_stage.symbol})"
+
+
+class EmailActionPerson(models.Model):
+    class Role(models.IntegerChoices):
+        TO = 1, "TO"
+        CC = 2, "CC"
+        BCC = 3, "BCC"
+
+    person = models.ForeignKey("Person", on_delete=models.CASCADE)
+    email_action = models.ForeignKey("EmailAction", on_delete=models.CASCADE)
+    role = models.IntegerField(choices=Role.choices)
+
+
+class EmailAction(models.Model):
+    investment_stage = models.ForeignKey(
+        InvestmentStage, on_delete=models.CASCADE, null=True, blank=True
+    )
+    persons = models.ManyToManyField("Person", through="EmailActionPerson")
+    name = models.CharField(max_length=30)
+    mail_subject = models.CharField(max_length=100)
+    mail_body = models.TextField()
+    mail_attachments = models.TextField()
+    is_template = models.BooleanField(default=False)
+    slug = models.SlugField(editable=False)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ("investment_stage", "slug")
+
+    def get_recipients(self) -> dict:
+        to = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.TO)
+        cc = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.CC)
+        bcc = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.BCC)
+        result = {
+            "to": [person.email_recipient for person in to],
+            "cc": [person.email_recipient for person in cc],
+            "bcc": [person.email_recipient for person in bcc],
+        }
+        return result
+
+    def _get_attachments_path_for_procedure(
+        self, procedure, relative=False
+    ) -> List[Tuple[str, str]]:
+        """Return a list of tuples (id, path) for attachments.
+        If `relative = True` path is relative to root directory of procedure."""
+        if not isinstance(procedure, Procedure):
+            raise TypeError(
+                f"procedure must be a Procedure instance, not {procedure.__class__.__name__}."
+            )
+        root_dir = path.abspath(procedure.directory)
+        if not path.isdir(root_dir):
+            raise ValueError(
+                "Path is incorrect. Expected path to root directory of procedure."
+            )
+        procedure_replacer = Replacer(procedure)
+        path_patterns = [line.strip() for line in self.mail_attachments.split("\r\n")]
+        abs_path_patterns = [
+            procedure_replacer(path.join(root_dir, pattern))
+            for pattern in path_patterns
+        ]
+        paths = []
+        for _path in abs_path_patterns:
+            paths.extend(glob(_path))
+        hash_list = [str(hash(path))[-6:] for path in paths]
+        if relative:
+            paths = [p[len(root_dir) :].strip(r"\/ ") for p in paths]
+        return list(zip(hash_list, paths))
+
+    def get_attachments_to_form(self, procedure: Procedure) -> List[Tuple]:
+        """Return a list of tuples (id, path) for attachments.
+        Path is relative to root directory of procedure."""
+
+        return self._get_attachments_path_for_procedure(procedure, relative=True)
+
+    def get_attachments_by_id(self, procedure: Procedure, id_list: List[str]):
+        """Return a list of absolute path of attachments  if `hash(path)[-6:]`
+        is in `id_list` and path matches the pattern specified
+        in self.mail_attachments field."""
+        if not isinstance(id_list, list):
+            raise TypeError(
+                f"id_list must be a list, not {id_list.__class__.__name__}."
+            )
+        if not all([isinstance(id, str) for id in id_list]):
+            raise TypeError("id_list must be a list of str.")
+        paths = self._get_attachments_path_for_procedure(procedure)
+        return [path for (id, path) in paths if id in id_list]
 
 
 # Model PozycjaKosztorysu??

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load bootstrap %}
+
+{% block content %}
+    <div style="width: 500px;">
+        
+        {% if form %}
+            <form method="post">{% csrf_token %}
+                {{ form|bootstrap }} 
+                <input type="submit" value="Wyślij">   
+            </form>
+        {% endif %}
+        
+        {% if error %}
+            <strong style="color:darkred"> {{ error }}</strong>
+        {% endif %}
+
+        {% if success %}
+            <strong style="color:darkgreen"> Wiadomość została utworzona (wersje robocze).</strong>
+        {% endif %}
+            
+            
+            
+    </div>   
+{% endblock content %}
+    

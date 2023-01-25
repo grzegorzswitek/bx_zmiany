@@ -1,7 +1,13 @@
 from datetime import date
+import tempfile
+from shutil import rmtree
+import os
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.template.defaultfilters import slugify
+
+from model_bakery import baker
 
 from zmiany_aranz.models import (
     Procedure,
@@ -19,6 +25,9 @@ from zmiany_aranz.models import (
     Cost,
     KindOfCost,
     CustomerOfProcedure,
+    InvestmentStagePerson,
+    EmailAction,
+    EmailActionPerson,
 )
 
 
@@ -329,3 +338,120 @@ class CustomerOfProcedureTest(TestCase):
         obj = CustomerOfProcedure(procedure=procedure, customer=customer)
         expected_str = f"Anna Kowalska ({number})"
         self.assertEqual(str(obj), expected_str)
+
+
+class InvestmentStagePersonTests(TestCase):
+    def test_str_method(self):
+        investment_stage = baker.make("InvestmentStage")
+        person = Person.objects.create(first_name="John", last_name="Smith")
+        obj = InvestmentStagePerson.objects.create(
+            person=person, investment_stage=investment_stage
+        )
+        self.assertEqual(str(obj), f"John Smith ({investment_stage.symbol})")
+
+
+class EmailActionTests(TestCase):
+    fixtures = ["email_action.json"]
+
+    def setUp(self) -> None:
+        self.directory = tempfile.mkdtemp()
+        os.mkdir(os.path.join(self.directory, "PDF po zmianach"))
+        self.abs_file_paths = [
+            os.path.join(self.directory, path)
+            for path in [
+                "URZ-N-M39B - Wniosek o zmiany aranżacyjne w mieszkaniu.pdf",
+                "URZ-N-M39B - Kosztorys.ath",
+                "URZ-N-M39B - Kosztorys.pdf",
+                "PDF po zmianach\\plik_1.pdf",
+                "PDF po zmianach\\plik_2.pdf",
+            ]
+        ]
+        for path in self.abs_file_paths:
+            with open(path, "w") as f:
+                f.write("Plik testowy")
+        self.ids = [str(hash(path))[-6:] for path in self.abs_file_paths]
+        self.procedure = Procedure.objects.get(pk=1)
+        self.procedure.directory = self.directory
+        self.procedure.save()
+        self.email_action = EmailAction.objects.get(pk=1)
+        return super().setUp()
+
+    def test_slug(self):
+        obj = baker.make("EmailAction", slug="Invalid slug")
+        correct_slug = slugify(obj.name)
+        self.assertEqual(obj.slug, correct_slug)
+
+    def test_get_recipients_empty(self):
+        obj: EmailAction = baker.make("EmailAction")
+        self.assertEqual(obj.get_recipients(), {"to": [], "cc": [], "bcc": []})
+
+    def test_get_recipients_filled(self):
+        obj = EmailAction.objects.get(pk=1)
+        self.assertEqual(
+            obj.get_recipients(),
+            {
+                "to": [
+                    "Adam Kwiatkowski <gw1@company.com>",
+                ],
+                "cc": [
+                    "Jerzy Kowalski <gw2@company.com>",
+                    "Anna Sadowska <gw3@company.com>",
+                ],
+                "bcc": [],
+            },
+        )
+
+    def test_get_attachments_path_for_procedure_errors(self):
+        obj: EmailAction = baker.make("EmailAction")
+        procedure = baker.make("Procedure", directory="invalid path")
+        with self.assertRaises(TypeError):
+            obj._get_attachments_path_for_procedure(13)
+        with self.assertRaises(ValueError):
+            obj._get_attachments_path_for_procedure(procedure)
+
+    def test_get_attachments_path_for_procedure_return(self):
+        expected_result = [
+            (id, path) for id, path in zip(self.ids, self.abs_file_paths)
+        ]
+        result = self.email_action._get_attachments_path_for_procedure(self.procedure)
+        self.assertEqual(result, expected_result)
+
+    def test_get_attachments_to_form_errors(self):
+        obj: EmailAction = baker.make("EmailAction")
+        procedure = baker.make("Procedure", directory="invalid path")
+        with self.assertRaises(TypeError):
+            obj.get_attachments_to_form(13)
+        with self.assertRaises(ValueError):
+            obj.get_attachments_to_form(procedure)
+
+    def test_get_attachments_to_form_return(self):
+        rel_paths = [
+            "URZ-N-M39B - Wniosek o zmiany aranżacyjne w mieszkaniu.pdf",
+            "URZ-N-M39B - Kosztorys.ath",
+            "URZ-N-M39B - Kosztorys.pdf",
+            "PDF po zmianach\\plik_1.pdf",
+            "PDF po zmianach\\plik_2.pdf",
+        ]
+        expected_result = [(id, rel_path) for id, rel_path in zip(self.ids, rel_paths)]
+        result = self.email_action.get_attachments_to_form(self.procedure)
+        self.assertEqual(result, expected_result)
+
+    def test_get_attachments_by_id_errors(self):
+        obj: EmailAction = baker.make("EmailAction")
+        procedure = baker.make("Procedure", directory="invalid path")
+        with self.assertRaises(TypeError):
+            obj.get_attachments_by_id(procedure=13, id_list=[])
+        with self.assertRaises(TypeError):
+            obj.get_attachments_by_id(procedure=self.procedure, id_list=[1, 2])
+        with self.assertRaises(ValueError):
+            obj.get_attachments_by_id(procedure, id_list=[])
+
+    def test_get_attachments_by_id_return(self):
+        ids = self.ids[::2]
+        expected_result = self.abs_file_paths[::2]
+        result = self.email_action.get_attachments_by_id(self.procedure, ids)
+        self.assertEqual(result, expected_result)
+
+    def tearDown(self) -> None:
+        rmtree(self.directory, ignore_errors=True)
+        return super().tearDown()
