@@ -178,8 +178,8 @@ class MessageTests(TestCase):
     def test_add_signature(self):
         message_body_txt = "Test body message.\n"
         message_body_html = "<body>Test body message.<br>Second line.<br></body>"
-        signature_content = "Best regards,\nJan Kowalski"
-        expected_message_body_txt = "Test body message.Best regards,\nJan Kowalski"
+        signature_content = "Best regards,\r\nJan Kowalski"
+        expected_message_body_txt = "Test body message.Best regards,\r\nJan Kowalski"
         expected_message_body_html = "<body>Test body message.<br>Second line.<br>Best regards,<br>Jan Kowalski</body>"
         signature_name = "test"
         Signature.objects.create(

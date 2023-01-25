@@ -43,8 +43,8 @@ class Message:
         self.cc = cc
         self.bcc = bcc
         self.subject = subject
-        self.body = body
         self.body_format = body_format
+        self.body = body
         self.attachments = attachments
         self.signature = signature_name
 
@@ -112,7 +112,7 @@ class Message:
             )
         subject = subject.strip()
         if len(subject) > 78:
-            raise ValueError("'subject' argument is too long.")
+            raise ValueError("'subject' argument is too long. Max length is 77.")
         self.__subject = subject
 
     @property
@@ -123,6 +123,8 @@ class Message:
     def body(self, body):
         if not isinstance(body, str):
             raise TypeError(f"'body' argument must be a str, not {type(body).__name__}")
+        if self.body_format == 2:
+            body = body.replace("\r\n", "<br>").replace("\n", "<br>")
         self.__body = body
 
     @property
@@ -140,6 +142,10 @@ class Message:
                 f"'body_format' argument must be in (0, 1, 2, 3), not {body_format}"
             )
         self.__body_format = body_format
+        if body_format == 2 and hasattr(self, "body"):
+            self.body = self.body.replace("\r\n", "<br>").replace("\n", "<br>")
+        elif hasattr(self, "body"):
+            self.body = self.body.replace("<br>", "\r\n")
 
     @property
     def attachments(self):
