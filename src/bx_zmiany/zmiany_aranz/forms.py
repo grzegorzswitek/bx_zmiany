@@ -8,6 +8,9 @@ class SendEmailForm(forms.Form):
     """Send Email form definition."""
 
     class RecipientValidator:
+        """Verifies that the recipient fields [to, cc, bcc]
+        contain a valid email address."""
+
         def __call__(self, value):
             recipients = value.strip().split("\r\n")
             pattern = "<(.*)>"
@@ -50,6 +53,7 @@ class SendEmailForm(forms.Form):
 
     def clean(self):
         data = super().clean()
+        # Change the recipient's TextField values to lists
         for field in ("to", "cc", "bcc"):
             data[field] = data.get(field, "").strip().split("\r\n")
         return data
