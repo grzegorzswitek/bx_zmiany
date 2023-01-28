@@ -97,12 +97,18 @@ class Procedure(models.Model):
 
     @property
     def number(self):
+        """
+        Return a procedure number in format nn/yyyy.
+        nn: next number
+        yyyy: year
+        """
         number = str(self._number).zfill(3)
         year = self._year[-2:]
         return f"{number}/{year}"
 
     @classmethod
-    def _get_new_number_and_year(cls):
+    def _get_new_number_and_year(cls) -> Tuple[int, str]:
+        """Return next procedure number and current year."""
         from datetime import date
 
         current_year = date.today().year
@@ -126,6 +132,7 @@ class Procedure(models.Model):
         unique_together = ("_number", "_year")
 
     def __str__(self) -> str:
+        """Unicode representation of Procedure."""
         return self.number
 
     @property
@@ -301,12 +308,13 @@ class PersonAbstract(models.Model):
         verbose_name_plural = "Persons"
         abstract = True
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Unicode representation of PersonAbstract."""
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
     @property
-    def email_recipient(self):
+    def email_recipient(self) -> str:
+        """Return an email recipients if exist, else empty str."""
         if not self.e_mail:
             return ""
         return f"{self.first_name} {self.last_name} <{self.e_mail}>".strip()
@@ -314,18 +322,7 @@ class PersonAbstract(models.Model):
 
 # Osoba
 class Person(PersonAbstract):
-    """
-    Model definition for Person.
-
-    Attributes
-    ----------
-    first_name : str
-    last_name : str
-    phone : str
-    e_mail : str
-    role : str
-    company : str
-    """
+    """Model definition for Person."""
 
     company = models.CharField(max_length=50, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
@@ -366,7 +363,7 @@ class Customer(PersonAbstract):
         """Unicode representation of Customer."""
         return super().__str__()
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(f"{APP_NAME}:customer_detail", kwargs={"pk": self.pk})
 
 
@@ -476,9 +473,7 @@ class Invoice(models.Model):
 
 # Koszty
 class Cost(models.Model):
-    """Model definition for Cost.
-    Like [project_replacement, `ocena koncepcji zmian`, ...]
-    """
+    """Model definition for Cost."""
 
     net = models.DecimalField(max_digits=8, decimal_places=2)
     vat = models.DecimalField(max_digits=7, decimal_places=2)
@@ -533,6 +528,8 @@ class InvestmentStagePerson(models.Model):
 
 
 class EmailActionPerson(models.Model):
+    """Model definition for EmailActionPerson."""
+
     class Role(models.IntegerChoices):
         TO = 1, "TO"
         CC = 2, "CC"
@@ -542,8 +539,14 @@ class EmailActionPerson(models.Model):
     email_action = models.ForeignKey("EmailAction", on_delete=models.CASCADE)
     role = models.IntegerField(choices=Role.choices)
 
+    def __str__(self) -> str:
+        """Unicode representation of EmailActionPerson."""
+        return f"{self.email_action} ({self.person})"
+
 
 class EmailAction(models.Model):
+    """Model definition for EmailAction."""
+
     investment_stage = models.ForeignKey(
         InvestmentStage, on_delete=models.CASCADE, null=True, blank=True
     )
@@ -562,7 +565,9 @@ class EmailAction(models.Model):
     class Meta:
         unique_together = ("investment_stage", "slug")
 
-    def get_recipients(self) -> dict:
+    def get_recipients(self) -> Dict[str, List[str]]:
+        """Return a dict of email recipients. Dict keys: ['to', 'cc', 'bcc']."""
+
         to = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.TO)
         cc = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.CC)
         bcc = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.BCC)
