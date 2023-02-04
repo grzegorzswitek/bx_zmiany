@@ -1,5 +1,11 @@
-<div>
+<div class="main-menu">
+    <div class="go-to-premises">
+        <form action="{% url 'zmiany_aranz:premises_redirect' %}" method="get">
+            <input type="text" name="premises-symbol" placeholder="Go to premises">
+        </form>
+
+    </div>
     <ul>
-        <li><a href="{% url 'zmiany_aranz:procedure_detail_view' 20 %}">Procedura 20</a></li>
+        <li><a href="{% url 'zmiany_aranz:procedure_detail_view' 1 %}">Procedura 1</a></li>
     </ul>
 </div>

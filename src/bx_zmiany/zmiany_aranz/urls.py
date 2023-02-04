@@ -1,4 +1,8 @@
 from django.urls import path
+from django.views.generic import DetailView
+
+from zmiany_aranz.models import Premises
+
 from zmiany_aranz.views import (
     IndexView,
     ProcedureDetailView,
@@ -24,6 +28,7 @@ from zmiany_aranz.views import (
     CustomerDeleteView,
     SendEmailView,
     PremisesImportView,
+    PremisesSymbolRedirectView,
 )
 
 app_name = "zmiany_aranz"
@@ -148,5 +153,17 @@ urlpatterns = [
         "premises-import/",
         PremisesImportView.as_view(),
         name="premises_import",
+    ),
+    path(
+        "premises/<int:pk>/",
+        DetailView.as_view(
+            model=Premises, template_name="zmiany_aranz/premises_detail.html"
+        ),
+        name="premises_detail",
+    ),
+    path(
+        "premises-redirect/",
+        PremisesSymbolRedirectView.as_view(),
+        name="premises_redirect",
     ),
 ]
