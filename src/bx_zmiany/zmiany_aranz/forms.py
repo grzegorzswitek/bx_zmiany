@@ -1,48 +1,32 @@
-import re
 from typing import *
 import csv
 
 from django import forms
-from django.core.validators import validate_email, FileExtensionValidator
+from django.core.validators import FileExtensionValidator
 
 from zmiany_aranz.models import Building, KindOfPremises, Premises
 from .validators import PremisesImportDataValidator
+
+from utils.forms.fields import MultiEmailRecipientField
 
 
 class SendEmailForm(forms.Form):
     """Send Email form definition."""
 
-    class RecipientValidator:
-        """Verifies that the recipient fields [to, cc, bcc]
-        contain a valid email address."""
-
-        def __call__(self, value):
-            recipients = value.strip().split("\r\n")
-            pattern = "<(.*)>"
-            for recipient in recipients:
-                if not recipient:
-                    continue
-                match = re.search(pattern, recipient)
-                if match is None:
-                    email_address = recipient
-                else:
-                    email_address = match.groups()[0]
-                validate_email(email_address)
-
-    to = forms.CharField(
+    to = MultiEmailRecipientField(
+        delimiter="\r\n",
         required=False,
         widget=forms.Textarea(attrs={"rows": 5}),
-        validators=[RecipientValidator()],
     )
-    cc = forms.CharField(
+    cc = MultiEmailRecipientField(
+        delimiter="\r\n",
         required=False,
         widget=forms.Textarea(attrs={"rows": 5}),
-        validators=[RecipientValidator()],
     )
-    bcc = forms.CharField(
+    bcc = MultiEmailRecipientField(
+        delimiter="\r\n",
         required=False,
         widget=forms.Textarea(attrs={"rows": 5}),
-        validators=[RecipientValidator()],
     )
     subject = forms.CharField(max_length=77)
     body = forms.CharField(widget=forms.Textarea(attrs={"rows": 10}))
@@ -55,13 +39,6 @@ class SendEmailForm(forms.Form):
         attachments_choices = kwargs.pop("attachments_choices", [])
         super().__init__(*args, **kwargs)
         self.fields["attachments"].choices = attachments_choices
-
-    def clean(self):
-        data = super().clean()
-        # Change the recipient's TextField values to lists
-        for field in ("to", "cc", "bcc"):
-            data[field] = data.get(field, "").strip().split("\r\n")
-        return data
 
 
 class PremisesImportForm(forms.Form):
