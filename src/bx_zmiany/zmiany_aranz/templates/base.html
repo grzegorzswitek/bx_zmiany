@@ -36,14 +36,12 @@
   <div class="container">
     <div class="main" id="main">
       <div class="context-menu">
-        {% block context-menu %}
         <p class="context-title">
           {% block context_title %}
-            {{context_title}}
+          {{context_title}}
           {% endblock %}
         </p>
-
-        {% endblock context-menu %}
+        {% block context_menu %}{% endblock %}
       </div>
       <div class="content">
         <!-- Messages -->
