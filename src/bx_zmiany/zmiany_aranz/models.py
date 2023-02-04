@@ -18,8 +18,6 @@ from .apps import ZmianyAranzConfig
 APP_NAME = ZmianyAranzConfig.name
 
 # https://learndjango.com/tutorials/django-custom-user-model
-
-
 # Użytkownik
 class CustomUser(AbstractUser):
     username = None

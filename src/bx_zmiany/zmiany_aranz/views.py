@@ -1,8 +1,8 @@
 from typing import *
 import logging
-from os import path
-from glob import glob
 
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import messages
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.views import View
@@ -14,6 +14,7 @@ from django.views.generic import (
     DeleteView,
     UpdateView,
     TemplateView,
+    FormView,
 )
 
 from outlook.outlook import Message
@@ -29,7 +30,7 @@ from .models import (
     InvestmentStage,
     InvestmentStagePerson,
 )
-from .forms import SendEmailForm
+from .forms import SendEmailForm, PremisesImportForm
 from zmiany_aranz.string_replacer import Replacer
 
 from zmiany_aranz.apps import ZmianyAranzConfig
@@ -513,3 +514,19 @@ class SendEmailView(View):
             self.template_name,
             context={"success": True},
         )
+
+
+class PremisesImportView(SuccessMessageMixin, FormView):
+    """View for importing multiple premises from a data file."""
+
+    template_name = f"{APP_NAME}/premises_import.html"
+    form_class = PremisesImportForm
+    success_url = "."
+
+    def form_valid(self, form) -> HttpResponse:
+        if form.added_premises:
+            messages.success(
+                self.request,
+                f"{form.added_premises} premises have been added to the database.",
+            )
+        return super().form_valid(form)

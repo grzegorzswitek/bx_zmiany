@@ -23,6 +23,7 @@ from zmiany_aranz.views import (
     CustomerUpdateView,
     CustomerDeleteView,
     SendEmailView,
+    PremisesImportView,
 )
 
 app_name = "zmiany_aranz"
@@ -142,5 +143,10 @@ urlpatterns = [
         "procedure/<int:pk>/send_email/<slug:slug>/",
         SendEmailView.as_view(),
         name="send_email",
+    ),
+    path(
+        "premises-import/",
+        PremisesImportView.as_view(),
+        name="premises_import",
     ),
 ]
