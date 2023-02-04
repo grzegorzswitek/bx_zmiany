@@ -1,12 +1,12 @@
 from typing import *
 import logging
-from os import path
-from glob import glob
 
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import messages
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.views import View
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     DetailView,
     ListView,
@@ -14,12 +14,15 @@ from django.views.generic import (
     DeleteView,
     UpdateView,
     TemplateView,
+    FormView,
+    RedirectView,
 )
 
 from outlook.outlook import Message
 
 from .models import (
     Procedure,
+    Premises,
     Cost,
     Invoice,
     Customer,
@@ -29,7 +32,7 @@ from .models import (
     InvestmentStage,
     InvestmentStagePerson,
 )
-from .forms import SendEmailForm
+from .forms import SendEmailForm, PremisesImportForm
 from zmiany_aranz.string_replacer import Replacer
 
 from zmiany_aranz.apps import ZmianyAranzConfig
@@ -512,4 +515,47 @@ class SendEmailView(View):
             request,
             self.template_name,
             context={"success": True},
+        )
+
+
+class PremisesImportView(SuccessMessageMixin, FormView):
+    """View for importing multiple premises from a data file."""
+
+    template_name = f"{APP_NAME}/premises_import.html"
+    form_class = PremisesImportForm
+    success_url = "."
+
+    def form_valid(self, form) -> HttpResponse:
+        if form.added_premises:
+            messages.success(
+                self.request,
+                f"{form.added_premises} premises have been added to the database.",
+            )
+        return super().form_valid(form)
+
+
+class PremisesSymbolRedirectView(View):
+    """Redirect to the procedure if the premises
+    is assigned to it or to the premises otherwise.
+    Redirect to the home page if the premises does not exist."""
+
+    home_url = reverse_lazy(f"{APP_NAME}:index")
+
+    def get(self, request, *args, **kwargs):
+        symbol = request.GET.get("premises-symbol")
+        if not symbol:
+            messages.warning(request, "Bad form")
+            return HttpResponseRedirect(self.home_url)
+        try:
+            premises = Premises.objects.get(symbol__iexact=symbol)
+        except Premises.DoesNotExist:
+            messages.warning(request, "Premises not found.")
+            return HttpResponseRedirect(self.home_url)
+        procedure = Procedure.objects.filter(premises=premises).last()
+        if not procedure:
+            return HttpResponseRedirect(
+                reverse(f"{APP_NAME}:premises_detail", kwargs={"pk": premises.pk})
+            )
+        return HttpResponseRedirect(
+            reverse(f"{APP_NAME}:procedure_detail_view", kwargs={"pk": procedure.pk})
         )

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block context_title %}
+{{object.symbol}}
+{% endblock %}
+
+
+{% block content %}
+    <table border="1">
+        <tbody>
+            <tr>
+                <td>symbol</td>
+                <td>{{ object.symbol }}</td>
+            </tr>
+            <tr>
+                <td>staircase</td>
+                <td>{{ object.staircase }}</td>
+            </tr>
+            <tr>
+                <td>storey</td>
+                <td>{{ object.storey }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock content %}
+    
