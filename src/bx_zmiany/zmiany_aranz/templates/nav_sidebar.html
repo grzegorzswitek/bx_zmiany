@@ -5,6 +5,9 @@
         </form>
 
     </div>
+    <p><a href="{% url 'zmiany_aranz:index' %}">Strona główna</a></p>
+    <p><a href="{% url 'zmiany_aranz:customer_create' %}">Nowy klient</a></p>
+    <p><a href="{% url 'zmiany_aranz:premises_import' %}">Import lokali</a></p>
     <ul>
         <li><a href="{% url 'zmiany_aranz:procedure_detail_view' 1 %}">Procedura 1</a></li>
     </ul>
