@@ -841,3 +841,22 @@ class SendEmailTests(TestCase):
     def tearDown(self) -> None:
         rmtree(self.directory)
         return super().tearDown()
+
+
+class PremisesImportTests(TestCase):
+    # TODO: test incorrect file
+    fixtures = ["premises_import.json"]
+
+    def test_import_success(self):
+        path = os.path.join(
+            os.path.dirname(__file__), r"import_premises\import_premises.csv"
+        )
+        with open(path) as f:
+            response = self.client.post(
+                reverse(f"{APP_NAME}:premises_import"), data={"file": f}, follow=True
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(Premises.objects.values_list("symbol")),
+            [("ENK-Z1-LM01",), ("ENK-Z1-LM02",), ("ENK-Z1-LM03",), ("ENK-Z1-LM04",)],
+        )

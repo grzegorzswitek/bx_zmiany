@@ -1,0 +1,39 @@
+[
+    {
+        "model": "zmiany_aranz.investment",
+        "pk": 1,
+        "fields": {
+            "symbol": "ENK",
+            "name": "Enklawa"
+        }
+    },
+    {
+        "model": "zmiany_aranz.investmentstage",
+        "pk": 1,
+        "fields": {
+            "investment": 1,
+            "symbol": "ENK-1",
+            "name": "Enklawa 1",
+            "number_of_flats": null
+        }
+    },
+    {
+        "model": "zmiany_aranz.building",
+        "pk": 1,
+        "fields": {
+            "investment_stage": 1,
+            "symbol": "ENK-Z1",
+            "name": "Enklawa Z1",
+            "location_desc": "Bydgoszcz, ul. Zaświat, budynek Z1"
+        }
+    },
+    {
+        "model": "zmiany_aranz.kindofpremises",
+        "pk": 1,
+        "fields": {
+            "symbol": "LM",
+            "name": "lokal mieszkalny",
+            "description": ""
+        }
+    }
+]
