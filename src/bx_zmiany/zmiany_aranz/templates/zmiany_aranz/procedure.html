@@ -1,76 +1,78 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p>
-    Numer procedury: 
-    {{ object }}
-    
-    {% if not object.accepted %}
-        <br> 
-        <small> Oznaczono jako nieprzyjęta.</small>
-    {% endif %}
-    </p>
-    <p>
-        Lokal:
-        {{ object.premises.all|join:', '}}
-    </p>
-    <p>
-        Klienci:
-        <ul>
-        {% for customer in object.customers.all %}
-            <li> 
-                {{ customer }}, 
-                tel: <a href="tel:{{customer.phone}}">{{customer.phone}}</a>, 
-                e-mail: <a href="mailto:{{customer.e_mail}}?subject={{object.premises.all|join:', '}} - ">{{customer.e_mail}}</a> 
-            </li>
-        {% endfor %}
-        </ul>
-    </p>
-    <p>
-        Osoby:
-        <ul>
-            
-            {% for person in object.persons.all %}
-            <li> 
-                {{ person }}, 
-                tel: <a href="tel:{{person.phone}}">{{person.phone}}</a>, 
-                e-mail: <a href="mailto:{{person.e_mail}}?subject={{object.premises.all|join:', '}} - ">{{person.e_mail}}</a> </li>
-            {% endfor %}
-        </ul>
-    </p>
-    <p>
-        Opiekun klienta:
-        
-        {% for customer_handler in object.customer_handler.all %}
-            {{ customer_handler }}, <a href="mailto:{{customer_handler.e_mail}}?subject={{object.premises.all|join:', '}} - ">{{customer_handler.e_mail}}</a>
-        {% endfor %}  
-    </p>
-    <p>
-        Status:
-        {{ object.get_status_display}}
-    </p>
-    <p>
-        Faktura:
-        {{ object.get_invoice_status_display }}
-        ({{ object.invoice_month|default:"bd."}}) - {{ object.gross_fee_for_arran_changes}} zł brutto
-    </p>
-    <p>
-        Uwagi: <br>
-        {{ object.comment|linebreaks}}
-    </p>
-    <p>
-        <ul>
-            <li><a href="{% url 'zmiany_aranz:procedure_costs_list' procedure.pk %}">Koszty</a></li>
-            <li><a href="{% url 'zmiany_aranz:procedure_cost_estimates_list' procedure.pk %}">Kosztorysy</a></li>
-            <li><a href="{% url 'zmiany_aranz:procedure_invoices_list' procedure.pk %}">Faktury</a></li>
-            <li><a href="{% url 'zmiany_aranz:procedure_customers_list' procedure.pk %}">Klienci</a></li> 
-            {% if email_actions %}  
-                {% for action in email_actions %} 
-                    <li><a href="{% url 'zmiany_aranz:send_email' procedure.pk action.slug %}">Wyślij {{ action.name }}</a></li>
-                {% endfor %}
-            {% endif %}
+<table border="1">
+    <tbody>
+        <tr>
+            <td>Numer procedury</td>
+            <td>
+                {{ object }}
+                {% if not object.accepted %}
+                <br>
+                <small> Oznaczono jako nieprzyjęta.</small>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Lokal</td>
+            <td>
                 
-        </ul>
-    </p>
-   
+                {% for premises in object.premises.all %}
+                    <a href="{% url 'zmiany_aranz:premises_detail' premises.pk %}">{{ premises }}</a>
+                {% endfor %}
+                    
+            </td>
+        </tr>
+        <tr>
+            <td>Klienci</td>
+            <td>
+                {% for customer in object.customers.all %}
+                <div style="line-height: 1.5;">
+                    {{ customer }},
+                    tel: <a href="tel:{{customer.phone}}">{{customer.phone}}</a>,
+                    e-mail: <a
+                        href="mailto:{{customer.e_mail}}?subject={{object.premises.all|join:', '}} - ">{{customer.e_mail}}</a>
+                </div>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Osoby</td>
+            <td>
+                {% for person in object.persons.all %}
+                <p>
+                    {{ person }},
+                    tel: <a href="tel:{{person.phone}}">{{person.phone}}</a>,
+                    e-mail: <a
+                        href="mailto:{{person.e_mail}}?subject={{object.premises.all|join:', '}} - ">{{person.e_mail}}</a>
+                </p>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Opiekun</td>
+            <td>
+                {% for customer_handler in object.customer_handler.all %}
+                {{ customer_handler }}, <a
+                    href="mailto:{{customer_handler.e_mail}}?subject={{object.premises.all|join:', '}} - ">{{customer_handler.e_mail}}</a>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Status</td>
+            <td>{{ object.get_status_display}}</td>
+        </tr>
+        <tr>
+            <td>Fakura</td>
+            <td>
+                {{ object.get_invoice_status_display }}
+                ({{ object.invoice_month|default:"bd."}}) - {{ object.gross_fee_for_arran_changes}} zł brutto
+            </td>
+        </tr>
+        <tr>
+            <td>Uwagi</td>
+            <td>{{ object.comment|linebreaks}}</td>
+        </tr>
+    </tbody>
+</table>
 {% endblock content %}
