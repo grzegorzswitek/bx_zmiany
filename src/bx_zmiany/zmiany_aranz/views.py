@@ -132,7 +132,7 @@ class ProcedureSubpagesUpdateView(UpdateView):
         )
 
 
-class ProcedureCustomersList(ListView):
+class ProcedureCustomersList(ProcedureSubpagesListView):
     model = CustomerOfProcedure
     template_name = f"{APP_NAME}/procedure_customers_list.html"
 
@@ -141,15 +141,6 @@ class ProcedureCustomersList(ListView):
         pk = self.kwargs["pk"]
         queryset = queryset.filter(procedure__in=[pk])
         return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        pk = self.kwargs["pk"]
-        try:
-            context["procedure"] = Procedure.objects.get(pk=pk)
-        except Procedure.DoesNotExist:
-            context["procedure"] = None
-        return context
 
     def get(self, request, *args, **kwargs):
         pk = self.kwargs["pk"]
