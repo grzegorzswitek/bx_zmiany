@@ -27,6 +27,8 @@ class ReplacerInterface:
 
     def _add_related_dict(self, object, prefix="", suffix=""):
         """Update self.replacements_dict with dict for related object."""
+        if object is None:
+            return
         if not all([isinstance(arg, str) for arg in [prefix, suffix]]):
             raise TypeError("Both, 'prefix' and 'suffix' must be a str.")
         related_replacer = Replacer(object)
