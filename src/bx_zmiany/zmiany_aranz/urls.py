@@ -6,19 +6,10 @@ from zmiany_aranz.models import Premises
 from zmiany_aranz.views import (
     IndexView,
     ProcedureDetailView,
-    ProcedureCostsList,
-    CostCreateView,
-    CostUpdateView,
-    CostDeleteView,
-    ProcedureCostEstimatesList,
-    CostEstimateCreateView,
-    CostEstimateUpdateView,
-    CostEstimateDeleteView,
-    ProcedureInvoicesList,
-    InvoiceCreateView,
-    InvoiceUpdateView,
-    InvoiceDeleteView,
-    ProcedureCustomersList,
+    ProcedureSubpagesListView,
+    ProcedureSubpagesCreateView,
+    ProcedureSubpagesUpdateView,
+    ProcedureSubpagesDeleteView,
     CustomerOfProcedureCreateView,
     CustomerOfProcedureUpdateView,
     CustomerOfProcedureDeleteView,
@@ -31,7 +22,16 @@ from zmiany_aranz.views import (
     PremisesSymbolRedirectView,
 )
 
+from .models import (
+    Premises,
+    Cost,
+    Invoice,
+    CustomerOfProcedure,
+    CostEstimate,
+)
+
 app_name = "zmiany_aranz"
+APP_NAME = app_name
 
 urlpatterns = [
     path(
@@ -46,67 +46,124 @@ urlpatterns = [
     ),
     path(
         "procedure/<int:pk>/cost/list/",
-        ProcedureCostsList.as_view(),
+        ProcedureSubpagesListView.as_view(
+            model=Cost,
+            template_name=f"{APP_NAME}/procedure_costs_list.html",
+        ),
         name="procedure_costs_list",
     ),
     path(
         "procedure/<int:pk>/cost/add/",
-        CostCreateView.as_view(),
+        ProcedureSubpagesCreateView.as_view(
+            model=Cost,
+            fields="__all__",
+            template_name=f"{APP_NAME}/procedure_cost_create.html",
+            success_url_name="procedure_costs_list",
+            related_field_name="costs",
+        ),
         name="procedure_cost_create",
     ),
     path(
         "cost/<int:pk>/update/",
-        CostUpdateView.as_view(),
+        ProcedureSubpagesUpdateView.as_view(
+            model=Cost,
+            fields="__all__",
+            template_name=f"{APP_NAME}/cost_update.html",
+            success_url_name="procedure_costs_list",
+        ),
         name="cost_update",
     ),
     path(
         "cost/<int:pk>/delete/",
-        CostDeleteView.as_view(),
+        ProcedureSubpagesDeleteView.as_view(
+            model=Cost,
+            template_name=f"{APP_NAME}/cost_delete_confirm.html",
+            success_url_name="procedure_costs_list",
+        ),
         name="cost_delete",
     ),
     path(
         "procedure/<int:pk>/cost_estimate/list/",
-        ProcedureCostEstimatesList.as_view(),
+        ProcedureSubpagesListView.as_view(
+            model=CostEstimate,
+            template_name=f"{APP_NAME}/procedure_cost_estimates_list.html",
+        ),
         name="procedure_cost_estimates_list",
     ),
     path(
         "procedure/<int:pk>/cost_estimate/add/",
-        CostEstimateCreateView.as_view(),
+        ProcedureSubpagesCreateView.as_view(
+            model=CostEstimate,
+            fields="__all__",
+            template_name=f"{APP_NAME}/procedure_cost_estimate_create.html",
+            success_url_name="procedure_cost_estimates_list",
+            related_field_name="cost_estimates",
+        ),
         name="procedure_cost_estimate_create",
     ),
     path(
         "cost_estimate/<int:pk>/update/",
-        CostEstimateUpdateView.as_view(),
+        ProcedureSubpagesUpdateView.as_view(
+            model=CostEstimate,
+            fields="__all__",
+            template_name=f"{APP_NAME}/cost_estimate_update.html",
+            success_url_name="procedure_cost_estimates_list",
+        ),
         name="cost_estimate_update",
     ),
     path(
         "cost_estimate/<int:pk>/delete/",
-        CostEstimateDeleteView.as_view(),
+        ProcedureSubpagesDeleteView.as_view(
+            model=CostEstimate,
+            template_name=f"{APP_NAME}/cost_estimate_delete_confirm.html",
+            success_url_name="procedure_cost_estimates_list",
+        ),
         name="cost_estimate_delete",
     ),
     path(
         "procedure/<int:pk>/invoice/list/",
-        ProcedureInvoicesList.as_view(),
+        ProcedureSubpagesListView.as_view(
+            model=Invoice,
+            template_name=f"{APP_NAME}/procedure_invoices_list.html",
+        ),
         name="procedure_invoices_list",
     ),
     path(
         "procedure/<int:pk>/invoice/add/",
-        InvoiceCreateView.as_view(),
+        ProcedureSubpagesCreateView.as_view(
+            model=Invoice,
+            fields="__all__",
+            template_name=f"{APP_NAME}/procedure_invoice_create.html",
+            success_url_name="procedure_invoices_list",
+            related_field_name="invoices",
+        ),
         name="procedure_invoice_create",
     ),
     path(
         "invoice/<int:pk>/update/",
-        InvoiceUpdateView.as_view(),
+        ProcedureSubpagesUpdateView.as_view(
+            model=Invoice,
+            fields="__all__",
+            template_name=f"{APP_NAME}/invoice_update.html",
+            success_url_name="procedure_invoices_list",
+        ),
         name="invoice_update",
     ),
     path(
         "invoice/<int:pk>/delete/",
-        InvoiceDeleteView.as_view(),
+        ProcedureSubpagesDeleteView.as_view(
+            model=Invoice,
+            template_name=f"{APP_NAME}/invoice_delete_confirm.html",
+            success_url_name="procedure_invoices_list",
+        ),
         name="invoice_delete",
     ),
     path(
         "procedure/<int:pk>/customer/list/",
-        ProcedureCustomersList.as_view(),
+        ProcedureSubpagesListView.as_view(
+            model=CustomerOfProcedure,
+            template_name=f"{APP_NAME}/procedure_customers_list.html",
+        ),
         name="procedure_customers_list",
     ),
     path(

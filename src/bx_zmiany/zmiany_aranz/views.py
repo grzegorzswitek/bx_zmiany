@@ -1,6 +1,7 @@
 from typing import *
 import logging
 
+from django.core.exceptions import FieldError
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.shortcuts import render
@@ -15,7 +16,6 @@ from django.views.generic import (
     UpdateView,
     TemplateView,
     FormView,
-    RedirectView,
 )
 
 from outlook.outlook import Message
@@ -23,14 +23,10 @@ from outlook.outlook import Message
 from .models import (
     Procedure,
     Premises,
-    Cost,
-    Invoice,
     Customer,
     CustomerOfProcedure,
-    CostEstimate,
     EmailAction,
     InvestmentStage,
-    InvestmentStagePerson,
 )
 from .forms import SendEmailForm, PremisesImportForm
 from zmiany_aranz.string_replacer import Replacer
@@ -46,10 +42,22 @@ class IndexView(TemplateView):
     template_name = "index.html"
 
 
-class ProcedureDetailView(DetailView):
+class ProcedureSubpagesAbstractView(View):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs.get("pk")
+        try:
+            context["procedure"] = Procedure.objects.get(pk=pk)
+        except Procedure.DoesNotExist:
+            raise Http404
+        return context
+
+
+class ProcedureDetailView(ProcedureSubpagesAbstractView, DetailView):
 
     model = Procedure
     template_name = f"{APP_NAME}/procedure.html"
+    context_object_name = "procedure"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context_data = super().get_context_data(**kwargs)
@@ -62,33 +70,20 @@ class ProcedureDetailView(DetailView):
         return context_data
 
 
-class ProcedureSubpagesAbstractListView(ListView):
+class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
-        pk = self.kwargs["pk"]
-        queryset = queryset.filter(procedures__in=[pk])
+        pk = self.kwargs.get("pk")
+        try:
+            queryset = queryset.filter(procedures__in=[pk])
+        except FieldError:
+            queryset = queryset.filter(procedure__in=[pk])
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        pk = self.kwargs["pk"]
-        try:
-            context["procedure"] = Procedure.objects.get(pk=pk)
-        except Procedure.DoesNotExist:
-            context["procedure"] = None
-        return context
 
-    def get(self, request, *args, **kwargs):
-        pk = self.kwargs["pk"]
-        try:
-            Procedure.objects.get(pk=pk)
-        except Procedure.DoesNotExist:
-            raise Http404
-        return super().get(request, *args, **kwargs)
-
-
-class ProcedureSubpagesAbstractCreateView(CreateView):
+class ProcedureSubpagesCreateView(ProcedureSubpagesAbstractView, CreateView):
     success_url_name = ""
+    related_field_name = ""
 
     def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
@@ -103,16 +98,23 @@ class ProcedureSubpagesAbstractCreateView(CreateView):
             raise Http404
         try:
             self.procedure = Procedure.objects.get(pk=pk)
+            related_field = getattr(self.procedure, self.related_field_name)
+            related_field.add(self.object)
             return response
         except Procedure.DoesNotExist:
             return Http404
+        except AttributeError as e:
+            raise ValueError("related_field_name is not valid.") from e
 
 
-class ProcedureSubpagesAbstractDeleteView(DeleteView):
+class ProcedureSubpagesDeleteView(DeleteView):
     success_url_name = ""
 
     def get_success_url(self) -> str:
-        procedure = self.object.procedures.first()
+        try:
+            procedure = self.object.procedures.first()
+        except AttributeError:
+            procedure = self.object.procedure
         if procedure is None:
             return "/"
         return reverse(
@@ -120,74 +122,14 @@ class ProcedureSubpagesAbstractDeleteView(DeleteView):
         )
 
 
-class ProcedureSubpagesAbstractUpdateView(UpdateView):
-    ulr_name = ""
+class ProcedureSubpagesUpdateView(UpdateView):
+    success_url_name = ""
 
     def get_success_url(self) -> str:
         procedure = self.object.procedures.first()
         return reverse(
             f"{APP_NAME}:{self.success_url_name}", kwargs={"pk": procedure.pk}
         )
-
-
-class ProcedureCostsList(ProcedureSubpagesAbstractListView):
-    model = Cost
-    template_name = f"{APP_NAME}/procedure_costs_list.html"
-
-
-class CostCreateView(ProcedureSubpagesAbstractCreateView):
-    model = Cost
-    fields = "__all__"
-    template_name = f"{APP_NAME}/procedure_cost_create.html"
-    success_url_name = "procedure_costs_list"
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.procedure.costs.add(self.object)
-        return response
-
-
-class CostDeleteView(ProcedureSubpagesAbstractDeleteView):
-    model = Cost
-    template_name = f"{APP_NAME}/cost_delete_confirm.html"
-    success_url_name = "procedure_costs_list"
-
-
-class CostUpdateView(ProcedureSubpagesAbstractUpdateView):
-    model = Cost
-    fields = "__all__"
-    template_name = f"{APP_NAME}/cost_update.html"
-    success_url_name = "procedure_costs_list"
-
-
-class ProcedureInvoicesList(ProcedureSubpagesAbstractListView):
-    model = Invoice
-    template_name = f"{APP_NAME}/procedure_invoices_list.html"
-
-
-class InvoiceCreateView(ProcedureSubpagesAbstractCreateView):
-    model = Invoice
-    fields = "__all__"
-    template_name = f"{APP_NAME}/procedure_invoice_create.html"
-    success_url_name = "procedure_invoices_list"
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.procedure.invoices.add(self.object)
-        return response
-
-
-class InvoiceDeleteView(ProcedureSubpagesAbstractDeleteView):
-    model = Invoice
-    template_name = f"{APP_NAME}/invoice_delete_confirm.html"
-    success_url_name = "procedure_invoices_list"
-
-
-class InvoiceUpdateView(ProcedureSubpagesAbstractUpdateView):
-    model = Invoice
-    fields = "__all__"
-    template_name = f"{APP_NAME}/invoice_update.html"
-    success_url_name = "procedure_invoices_list"
 
 
 class ProcedureCustomersList(ListView):
@@ -216,43 +158,6 @@ class ProcedureCustomersList(ListView):
         except Procedure.DoesNotExist:
             raise Http404
         return super().get(request, *args, **kwargs)
-
-
-class CustomerOfProcedureCreateView(CreateView):
-    model = CustomerOfProcedure
-    fields = "__all__"
-    template_name = f"{APP_NAME}/procedure_customer_create.html"
-
-    def get_success_url(self) -> str:
-        pk = self.kwargs.get("pk", None)
-        if pk is None:
-            return super().get_success_url()
-        return reverse(f"{APP_NAME}:procedure_customers_list", kwargs={"pk": pk})
-
-
-class CustomerOfProcedureDeleteView(DeleteView):
-    model = CustomerOfProcedure
-    template_name = f"{APP_NAME}/customer_of_procedure_delete_confirm.html"
-
-    def get_success_url(self) -> str:
-        procedure = self.object.procedure
-        if procedure is None:
-            return "/"
-        return reverse(
-            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
-        )
-
-
-class CustomerOfProcedureUpdateView(UpdateView):
-    model = CustomerOfProcedure
-    fields = "__all__"
-    template_name = f"{APP_NAME}/customer_of_procedure_update.html"
-
-    def get_success_url(self) -> str:
-        procedure = self.object.procedure
-        return reverse(
-            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
-        )
 
 
 class CustomerCreateView(CreateView):
@@ -288,32 +193,15 @@ class CustomerDeleteView(DeleteView):
         return result
 
 
-class ProcedureCustomersList(ListView):
-    model = CustomerOfProcedure
-    template_name = f"{APP_NAME}/procedure_customers_list.html"
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        pk = self.kwargs["pk"]
-        queryset = queryset.filter(procedure__in=[pk])
-        return queryset
-
+class CustomerOfProcedureAbstractView(View):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        pk = self.kwargs["pk"]
-        try:
-            context["procedure"] = Procedure.objects.get(pk=pk)
-        except Procedure.DoesNotExist:
-            context["procedure"] = None
-        return context
-
-    def get(self, request, *args, **kwargs):
-        pk = self.kwargs["pk"]
-        try:
-            Procedure.objects.get(pk=pk)
-        except Procedure.DoesNotExist:
+        procedure = self.object.procedure
+        if procedure:
+            context["procedure"] = procedure
+        else:
             raise Http404
-        return super().get(request, *args, **kwargs)
+        return context
 
 
 class CustomerOfProcedureCreateView(CreateView):
@@ -345,7 +233,7 @@ class CustomerOfProcedureCreateView(CreateView):
         return reverse(f"{APP_NAME}:procedure_customers_list", kwargs={"pk": pk})
 
 
-class CustomerOfProcedureDeleteView(DeleteView):
+class CustomerOfProcedureDeleteView(CustomerOfProcedureAbstractView, DeleteView):
     model = CustomerOfProcedure
     template_name = f"{APP_NAME}/customer_of_procedure_delete_confirm.html"
 
@@ -358,7 +246,7 @@ class CustomerOfProcedureDeleteView(DeleteView):
         )
 
 
-class CustomerOfProcedureUpdateView(UpdateView):
+class CustomerOfProcedureUpdateView(CustomerOfProcedureAbstractView, UpdateView):
     model = CustomerOfProcedure
     fields = "__all__"
     template_name = f"{APP_NAME}/customer_of_procedure_update.html"
@@ -406,36 +294,6 @@ class CustomerDeleteView(DeleteView):
         if self.object is not None:
             result.update({"assigned_to_procedures": self.object.procedures.all()})
         return result
-
-
-class ProcedureCostEstimatesList(ProcedureSubpagesAbstractListView):
-    model = CostEstimate
-    template_name = f"{APP_NAME}/procedure_cost_estimates_list.html"
-
-
-class CostEstimateCreateView(ProcedureSubpagesAbstractCreateView):
-    model = CostEstimate
-    fields = "__all__"
-    template_name = f"{APP_NAME}/procedure_cost_estimate_create.html"
-    success_url_name = "procedure_cost_estimates_list"
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.procedure.cost_estimates.add(self.object)
-        return response
-
-
-class CostEstimateDeleteView(ProcedureSubpagesAbstractDeleteView):
-    model = CostEstimate
-    template_name = f"{APP_NAME}/cost_estimate_delete_confirm.html"
-    success_url_name = "procedure_cost_estimates_list"
-
-
-class CostEstimateUpdateView(ProcedureSubpagesAbstractUpdateView):
-    model = CostEstimate
-    fields = "__all__"
-    template_name = f"{APP_NAME}/cost_estimate_update.html"
-    success_url_name = "procedure_cost_estimates_list"
 
 
 class SendEmailView(View):
