@@ -203,6 +203,14 @@ class CustomerOfProcedureAbstractView(View):
             raise Http404
         return context
 
+    def get_success_url(self) -> str:
+        procedure = self.object.procedure
+        if procedure is None:
+            return "/"
+        return reverse(
+            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
+        )
+
 
 class CustomerOfProcedureCreateView(CreateView):
     model = CustomerOfProcedure
@@ -237,14 +245,6 @@ class CustomerOfProcedureDeleteView(CustomerOfProcedureAbstractView, DeleteView)
     model = CustomerOfProcedure
     template_name = f"{APP_NAME}/customer_of_procedure_delete_confirm.html"
 
-    def get_success_url(self) -> str:
-        procedure = self.object.procedure
-        if procedure is None:
-            return "/"
-        return reverse(
-            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
-        )
-
 
 class CustomerOfProcedureUpdateView(CustomerOfProcedureAbstractView, UpdateView):
     model = CustomerOfProcedure
@@ -255,12 +255,6 @@ class CustomerOfProcedureUpdateView(CustomerOfProcedureAbstractView, UpdateView)
         form = super().get_form()
         form.fields["procedure"].disabled = True
         return form
-
-    def get_success_url(self) -> str:
-        procedure = self.object.procedure
-        return reverse(
-            f"{APP_NAME}:procedure_customers_list", kwargs={"pk": procedure.pk}
-        )
 
 
 class CustomerCreateView(CreateView):
