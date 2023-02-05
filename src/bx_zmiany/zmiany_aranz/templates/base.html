@@ -41,7 +41,13 @@
           {{context_title}}
           {% endblock %}
         </p>
-        {% block context_menu %}{% endblock %}
+        {% block context_menu %}
+        
+        {% if ctx_menu_template %}
+          {% include ctx_menu_template %}
+        {% endif %}
+          
+        {% endblock %}
       </div>
       <div class="content">
         <!-- Messages -->

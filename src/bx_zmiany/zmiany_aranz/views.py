@@ -33,6 +33,8 @@ from zmiany_aranz.string_replacer import Replacer
 
 from zmiany_aranz.apps import ZmianyAranzConfig
 
+from utils.decorators import ctx_menu_template
+
 APP_NAME = ZmianyAranzConfig.name
 
 logger = logging.getLogger(__name__)
@@ -53,6 +55,7 @@ class ProcedureSubpagesAbstractView(View):
         return context
 
 
+@ctx_menu_template(template_name="zmiany_aranz/procedure-ctx-menu.html")
 class ProcedureDetailView(ProcedureSubpagesAbstractView, DetailView):
 
     model = Procedure
@@ -70,6 +73,7 @@ class ProcedureDetailView(ProcedureSubpagesAbstractView, DetailView):
         return context_data
 
 
+@ctx_menu_template(template_name="zmiany_aranz/procedure-ctx-menu.html")
 class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -81,6 +85,7 @@ class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
         return queryset
 
 
+@ctx_menu_template(template_name="zmiany_aranz/procedure-ctx-menu.html")
 class ProcedureSubpagesCreateView(ProcedureSubpagesAbstractView, CreateView):
     success_url_name = ""
     related_field_name = ""
