@@ -160,39 +160,6 @@ class ProcedureCustomersList(ListView):
         return super().get(request, *args, **kwargs)
 
 
-class CustomerCreateView(CreateView):
-    """Class for Customer creating."""
-
-    model = Customer
-    fields = "__all__"
-
-
-class CustomerDetailView(DetailView):
-    """DetailView for Customer model."""
-
-    model = Customer
-
-
-class CustomerUpdateView(UpdateView):
-    """UpdateView for Customer model."""
-
-    model = Customer
-    fields = "__all__"
-
-
-class CustomerDeleteView(DeleteView):
-    """DeleteView for Customer model."""
-
-    model = Customer
-    success_url = "/"
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        result = super().get_context_data(**kwargs)
-        if self.object is not None:
-            result.update({"assigned_to_procedures": self.object.procedures.all()})
-        return result
-
-
 class CustomerOfProcedureAbstractView(View):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -255,39 +222,6 @@ class CustomerOfProcedureUpdateView(CustomerOfProcedureAbstractView, UpdateView)
         form = super().get_form()
         form.fields["procedure"].disabled = True
         return form
-
-
-class CustomerCreateView(CreateView):
-    """Class for Customer creating."""
-
-    model = Customer
-    fields = "__all__"
-
-
-class CustomerDetailView(DetailView):
-    """DetailView for Customer model."""
-
-    model = Customer
-
-
-class CustomerUpdateView(UpdateView):
-    """UpdateView for Customer model."""
-
-    model = Customer
-    fields = "__all__"
-
-
-class CustomerDeleteView(DeleteView):
-    """DeleteView for Customer model."""
-
-    model = Customer
-    success_url = "/"
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        result = super().get_context_data(**kwargs)
-        if self.object is not None:
-            result.update({"assigned_to_procedures": self.object.procedures.all()})
-        return result
 
 
 class SendEmailView(View):

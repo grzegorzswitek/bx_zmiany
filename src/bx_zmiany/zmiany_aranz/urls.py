@@ -1,5 +1,5 @@
 from django.urls import path
-from django.views.generic import DetailView
+from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 
 from zmiany_aranz.models import Premises
 
@@ -13,10 +13,6 @@ from zmiany_aranz.views import (
     CustomerOfProcedureCreateView,
     CustomerOfProcedureUpdateView,
     CustomerOfProcedureDeleteView,
-    CustomerCreateView,
-    CustomerDetailView,
-    CustomerUpdateView,
-    CustomerDeleteView,
     SendEmailView,
     PremisesImportView,
     PremisesSymbolRedirectView,
@@ -28,6 +24,7 @@ from .models import (
     Invoice,
     CustomerOfProcedure,
     CostEstimate,
+    Customer,
 )
 
 app_name = "zmiany_aranz"
@@ -183,22 +180,22 @@ urlpatterns = [
     ),
     path(
         "customer/create/",
-        CustomerCreateView.as_view(),
+        CreateView.as_view(model=Customer, fields="__all__"),
         name="customer_create",
     ),
     path(
         "customer/<int:pk>/",
-        CustomerDetailView.as_view(),
+        DetailView.as_view(model=Customer),
         name="customer_detail",
     ),
     path(
         "customer/<int:pk>/update/",
-        CustomerUpdateView.as_view(),
+        UpdateView.as_view(model=Customer, fields="__all__"),
         name="customer_update",
     ),
     path(
         "customer/<int:pk>/delete/",
-        CustomerDeleteView.as_view(),
+        DeleteView.as_view(model=Customer, success_url="/"),
         name="customer_delete",
     ),
     path(
