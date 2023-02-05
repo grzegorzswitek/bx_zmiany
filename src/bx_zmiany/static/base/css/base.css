@@ -4,6 +4,21 @@
     box-sizing: border-box;
 }
 
+th,
+td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+td:first-child {
+    font-weight: 600;
+}
+
+th {
+    background-color: lightgray;
+}
+
 body {
     margin: 0;
     padding: 0;
