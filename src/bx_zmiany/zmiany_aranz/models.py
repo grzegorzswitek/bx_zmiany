@@ -1,9 +1,10 @@
 from typing import *
 import os.path
 from glob import glob
+from itertools import groupby
 
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, F
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -564,17 +565,19 @@ class EmailAction(models.Model):
         unique_together = ("investment_stage", "slug")
 
     def get_recipients(self) -> Dict[str, List[str]]:
-        """Return a dict of email recipients. Dict keys: ['to', 'cc', 'bcc']."""
+        """Return a dict of email recipients. Dict keys: ['TO', 'CC', 'BCC']."""
 
-        to = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.TO)
-        cc = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.CC)
-        bcc = self.persons.filter(emailactionperson__role=EmailActionPerson.Role.BCC)
-        result = {
-            "to": [person.email_recipient for person in to],
-            "cc": [person.email_recipient for person in cc],
-            "bcc": [person.email_recipient for person in bcc],
-        }
-        return result
+        persons = self.persons.annotate(_role=F("emailactionperson__role"))
+        persons_grouper = groupby(persons, key=lambda person: person._role)
+        roles = dict(EmailActionPerson.Role.choices)
+        recipients = {"TO": [], "CC": [], "BCC": []}
+        recipients.update(
+            {
+                roles[role]: [person.email_recipient for person in persons]
+                for role, persons in persons_grouper
+            }
+        )
+        return recipients
 
     def _get_attachments_path_for_procedure(
         self, procedure, relative=False

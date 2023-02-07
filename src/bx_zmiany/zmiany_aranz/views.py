@@ -235,9 +235,9 @@ class SendEmailView(FormView):
         ]
         initial.update(
             {
-                "to": "\r\n".join(recipients["to"]),
-                "cc": "\r\n".join(recipients["cc"]),
-                "bcc": "\r\n".join(recipients["bcc"]),
+                "to": "\r\n".join(recipients["TO"]),
+                "cc": "\r\n".join(recipients["CC"]),
+                "bcc": "\r\n".join(recipients["BCC"]),
                 "subject": mail_subject,
                 "body": mail_body,
                 "attachments": [id for (id, _) in attachment_seq],

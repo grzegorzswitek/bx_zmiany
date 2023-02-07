@@ -383,21 +383,21 @@ class EmailActionTests(TestCase):
 
     def test_get_recipients_empty(self):
         obj: EmailAction = baker.make("EmailAction")
-        self.assertEqual(obj.get_recipients(), {"to": [], "cc": [], "bcc": []})
+        self.assertEqual(obj.get_recipients(), {"TO": [], "CC": [], "BCC": []})
 
     def test_get_recipients_filled(self):
         obj = EmailAction.objects.get(pk=1)
         self.assertEqual(
             obj.get_recipients(),
             {
-                "to": [
+                "TO": [
                     "Adam Kwiatkowski <gw1@company.com>",
                 ],
-                "cc": [
+                "CC": [
                     "Jerzy Kowalski <gw2@company.com>",
                     "Anna Sadowska <gw3@company.com>",
                 ],
-                "bcc": [],
+                "BCC": [],
             },
         )
 
