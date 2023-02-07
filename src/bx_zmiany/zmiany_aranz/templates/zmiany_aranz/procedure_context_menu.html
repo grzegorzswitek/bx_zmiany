@@ -1,9 +1,0 @@
-<p><a href="{% url 'zmiany_aranz:procedure_costs_list' procedure.pk %}">Koszty</a></p>
-<p><a href="{% url 'zmiany_aranz:procedure_cost_estimates_list' procedure.pk %}">Kosztorysy</a></p>
-<p><a href="{% url 'zmiany_aranz:procedure_invoices_list' procedure.pk %}">Faktury</a></p>
-<p><a href="{% url 'zmiany_aranz:procedure_customers_list' procedure.pk %}">Klienci</a></p> 
-{% if email_actions %}
-    {% for action in email_actions %}
-        <p><a href="{% url 'zmiany_aranz:send_email' procedure.pk action.slug %}">Wyślij {{ action.name }}</a></p>
-    {% endfor %}
-{% endif %}
