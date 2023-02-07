@@ -42,11 +42,9 @@
           {% endblock %}
         </p>
         {% block context_menu %}
-        
-        {% if ctx_menu_template %}
-          {% include ctx_menu_template %}
-        {% endif %}
-          
+          {% if ctx_menu_template %}
+            {% include ctx_menu_template %}
+          {% endif %}
         {% endblock %}
       </div>
       <div class="content">
