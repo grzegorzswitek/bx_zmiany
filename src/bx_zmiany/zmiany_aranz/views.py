@@ -4,7 +4,6 @@ import logging
 from django.core.exceptions import FieldError
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
-from django.shortcuts import render
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.views import View
 from django.urls import reverse, reverse_lazy
@@ -23,7 +22,6 @@ from outlook.outlook import Message
 from .models import (
     Procedure,
     Premises,
-    Customer,
     CustomerOfProcedure,
     EmailAction,
     InvestmentStage,
@@ -32,8 +30,6 @@ from .forms import SendEmailForm, PremisesImportForm
 from zmiany_aranz.string_replacer import Replacer
 
 from zmiany_aranz.apps import ZmianyAranzConfig
-
-from utils.decorators import ctx_menu_template
 
 APP_NAME = ZmianyAranzConfig.name
 
@@ -55,12 +51,12 @@ class ProcedureSubpagesAbstractView(View):
         return context
 
 
-@ctx_menu_template(template_name="zmiany_aranz/procedure-ctx-menu.html")
 class ProcedureDetailView(ProcedureSubpagesAbstractView, DetailView):
 
     model = Procedure
     template_name = f"{APP_NAME}/procedure.html"
     context_object_name = "procedure"
+    extra_context = {"ctx_menu_template": "zmiany_aranz/procedure-ctx-menu.html"}
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context_data = super().get_context_data(**kwargs)
@@ -73,8 +69,9 @@ class ProcedureDetailView(ProcedureSubpagesAbstractView, DetailView):
         return context_data
 
 
-@ctx_menu_template(template_name="zmiany_aranz/procedure-ctx-menu.html")
 class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
+    extra_context = {"ctx_menu_template": "zmiany_aranz/procedure-ctx-menu.html"}
+
     def get_queryset(self):
         queryset = super().get_queryset()
         pk = self.kwargs.get("pk")
@@ -85,10 +82,10 @@ class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
         return queryset
 
 
-@ctx_menu_template(template_name="zmiany_aranz/procedure-ctx-menu.html")
 class ProcedureSubpagesCreateView(ProcedureSubpagesAbstractView, CreateView):
     success_url_name = ""
     related_field_name = ""
+    extra_context = {"ctx_menu_template": "zmiany_aranz/procedure-ctx-menu.html"}
 
     def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
@@ -220,67 +217,46 @@ class CustomerOfProcedureUpdateView(CustomerOfProcedureAbstractView, UpdateView)
         return form
 
 
-class SendEmailView(View):
+class SendEmailView(FormView):
     template_name = f"{APP_NAME}/send_email.html"
     form_class = SendEmailForm
+    success_url = "."
 
-    def request_decorator(func):
-        def wrapper_request_decorator(self, request, *args, **kwargs):
-            # After request method (get or post).
-            action_name = kwargs.get("slug", None)
-            procedure_pk = kwargs.get("pk", None)
-            try:
-                procedure = Procedure.objects.get(pk=procedure_pk)
-            except Procedure.DoesNotExist:
-                logger.warning("Procedure DoesNotExist")
-                raise Http404("Procedure DoesNotExist")
-            investment_stage = procedure.investment_stage
-            if investment_stage is None:
-                logger.warning("InvestmentStage is None")
-                raise Http404("InvestmentStage is None")
-            try:
-                action = EmailAction.objects.get(
-                    investment_stage=investment_stage, slug=action_name
-                )
-            except EmailAction.DoesNotExist:
-                logger.warning("EmailAction DoesNotExist")
-                raise Http404("EmailAction DoesNotExist")
-            # Call request method (get or post).
-            result = func(self, request, procedure, action, *args, **kwargs)
-            return result
-
-        return wrapper_request_decorator
-
-    @request_decorator
-    def get(self, request, procedure, action, *args, **kwargs):
-        recipients = action.get_recipients()
-        procedure_replacer = Replacer(procedure)
-        attachment_seq = action.get_attachments_to_form(procedure)
+    def get_initial(self):
+        initial = super().get_initial()
+        recipients = self.action.get_recipients()
+        procedure_replacer = Replacer(self.procedure)
+        attachment_seq = self.action.get_attachments_to_form(self.procedure)
         mail_subject, mail_body = [
-            procedure_replacer(getattr(action, field))
-            if getattr(action, field) is not None
+            procedure_replacer(getattr(self.action, field))
+            if getattr(self.action, field) is not None
             else ""
             for field in ["mail_subject", "mail_body"]
         ]
-        initial = {
-            "to": "\r\n".join(recipients["to"]),
-            "cc": "\r\n".join(recipients["cc"]),
-            "bcc": "\r\n".join(recipients["bcc"]),
-            "subject": mail_subject,
-            "body": mail_body,
-            "attachments": [id for (id, _) in attachment_seq],
-        }
-        form = self.form_class(initial=initial, attachments_choices=attachment_seq)
-        return render(request, self.template_name, context={"form": form})
+        initial.update(
+            {
+                "to": "\r\n".join(recipients["to"]),
+                "cc": "\r\n".join(recipients["cc"]),
+                "bcc": "\r\n".join(recipients["bcc"]),
+                "subject": mail_subject,
+                "body": mail_body,
+                "attachments": [id for (id, _) in attachment_seq],
+            }
+        )
+        return initial
 
-    @request_decorator
-    def post(self, request, procedure, action, *args, **kwargs):
-        attachment_seq = action.get_attachments_to_form(procedure)
-        form = self.form_class(request.POST, attachments_choices=attachment_seq)
-        if not form.is_valid():
-            return render(request, self.template_name, context={"form": form})
+    def get_form_kwargs(self) -> Dict[str, Any]:
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            {"attachments_choices": self.action.get_attachments_to_form(self.procedure)}
+        )
+        return kwargs
+
+    def form_valid(self, form) -> HttpResponse:
         attachemnts_ids = form.cleaned_data["attachments"]
-        attachemnts_paths = action.get_attachments_by_id(procedure, attachemnts_ids)
+        attachemnts_paths = self.action.get_attachments_by_id(
+            self.procedure, attachemnts_ids
+        )
         message_data = form.cleaned_data
         message_data["attachments"] = attachemnts_paths
         try:
@@ -288,16 +264,33 @@ class SendEmailView(View):
             message.create()
             message.save()
         except Exception as e:
-            return render(
-                request,
-                self.template_name,
+            messages.error(
+                self.request, f"Nie udało się utworzyć wiadomości e-mail. {e}."
+            )
+            return super().get(
+                self.request,
                 context={"error": f"Nie udało się utworzyć wiadomości e-mail ({e})."},
             )
-        return render(
-            request,
-            self.template_name,
-            context={"success": True},
-        )
+        messages.success(self.request, "Wiadomość została utworzona (wersje robocze).")
+        return super().form_valid(form)
+
+    def dispatch(self, request, *args: Any, **kwargs: Any) -> HttpResponse:
+        action_name = kwargs.get("slug", None)
+        procedure_pk = kwargs.get("pk", None)
+        try:
+            self.procedure = Procedure.objects.get(pk=procedure_pk)
+        except Procedure.DoesNotExist:
+            raise Http404("Procedure DoesNotExist")
+        self.investment_stage = self.procedure.investment_stage
+        if self.investment_stage is None:
+            raise Http404("InvestmentStage is None")
+        try:
+            self.action = EmailAction.objects.get(
+                investment_stage=self.investment_stage, slug=action_name
+            )
+        except EmailAction.DoesNotExist:
+            raise Http404("EmailAction DoesNotExist")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class PremisesImportView(SuccessMessageMixin, FormView):
