@@ -834,6 +834,7 @@ class SendEmailTests(TestCase):
                 "body": "Dzień dobry,\r\nW załączeniu przesyłam wniosek o zmiany.",
                 "attachments": self.attachments_ids,
             },
+            follow=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Wiadomość została utworzona")
