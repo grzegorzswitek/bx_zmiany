@@ -45,9 +45,16 @@ class ProcedureSubpagesAbstractView(View):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get("pk")
         try:
-            context["procedure"] = Procedure.objects.get(pk=pk)
+            procedure = Procedure.objects.get(pk=pk)
         except Procedure.DoesNotExist:
             raise Http404
+        investment_stage = procedure.investment_stage
+        email_actions = None
+        if investment_stage:
+            email_actions = EmailAction.objects.filter(
+                investment_stage=investment_stage.pk
+            )
+        context.update({"procedure": procedure, "email_actions": email_actions})
         return context
 
 
