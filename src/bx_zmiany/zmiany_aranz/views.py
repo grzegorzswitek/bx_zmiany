@@ -42,6 +42,8 @@ class IndexView(TemplateView):
 
 
 class ProcedureSubpagesAbstractView(View):
+    extra_context = {"ctx_menu_template": "zmiany_aranz/procedure-ctx-menu.html"}
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get("pk")
@@ -119,6 +121,22 @@ class ProcedureListView(ListView):
                 queryset = queryset.building__in(buildings)
 
         return super().get_context_data(form=form, object_list=queryset, **kwargs)
+
+
+class ProcedureUpdateView(ProcedureSubpagesAbstractView, UpdateView):
+    model = Procedure
+    template_name = f"{APP_NAME}/procedure_update.html"
+    fields = [
+        "premises",
+        "customer_handler",
+        "status",
+        "invoice_status",
+        "invoice_month",
+        "gross_fee_for_arran_changes",
+        "accepted",
+        "directory",
+        "comment",
+    ]
 
 
 class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):

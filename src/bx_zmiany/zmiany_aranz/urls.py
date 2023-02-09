@@ -18,6 +18,7 @@ from zmiany_aranz.views import (
     PremisesSymbolRedirectView,
     ProcedureCreateRedirect,
     ProcedureListView,
+    ProcedureUpdateView,
 )
 
 from .models import (
@@ -228,4 +229,9 @@ urlpatterns = [
         name="procedure_create_redirect",
     ),
     path("procedure/list/", ProcedureListView.as_view(), name="procedure_list"),
+    path(
+        "procedure/<int:pk>/update/",
+        ProcedureUpdateView.as_view(),
+        name="procedure_update",
+    ),
 ]
