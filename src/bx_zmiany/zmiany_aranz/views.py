@@ -140,8 +140,6 @@ class ProcedureUpdateView(ProcedureSubpagesAbstractView, UpdateView):
 
 
 class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
-    extra_context = {"ctx_menu_template": "zmiany_aranz/procedure-ctx-menu.html"}
-
     def get_queryset(self):
         queryset = super().get_queryset()
         pk = self.kwargs.get("pk")
@@ -155,7 +153,6 @@ class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):
 class ProcedureSubpagesCreateView(ProcedureSubpagesAbstractView, CreateView):
     success_url_name = ""
     related_field_name = ""
-    extra_context = {"ctx_menu_template": "zmiany_aranz/procedure-ctx-menu.html"}
 
     def get_success_url(self) -> str:
         pk = self.kwargs.get("pk", None)
