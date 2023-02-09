@@ -593,6 +593,8 @@ class EmailAction(models.Model):
             raise TypeError(
                 f"procedure must be a Procedure instance, not {procedure.__class__.__name__}."
             )
+        if not procedure.directory:
+            return []
         root_dir = os.path.abspath(procedure.directory)
         if not os.path.isdir(root_dir):
             raise ValueError(
