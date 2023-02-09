@@ -94,6 +94,9 @@ class Procedure(models.Model):
 
     # TODO: wykrywanie zmian osób przynależnych do procedury (zmiana właścicieli mieszkania)
 
+    def get_absolute_url(self):
+        return reverse(f"{APP_NAME}:procedure_detail_view", kwargs={"pk": self.pk})
+
     @property
     def number(self):
         """

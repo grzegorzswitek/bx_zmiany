@@ -15,6 +15,7 @@ from django.views.generic import (
     UpdateView,
     TemplateView,
     FormView,
+    RedirectView,
 )
 
 from outlook.outlook import Message
@@ -74,6 +75,27 @@ class ProcedureDetailView(ProcedureSubpagesAbstractView, DetailView):
             )
             context_data.update({"email_actions": email_actions})
         return context_data
+
+
+class ProcedureCreateRedirect(RedirectView):
+    """Create a procedure for a given premises and redirect to the
+    details of the procedure."""
+
+    def get_redirect_url(self, *args: Any, **kwargs: Any) -> Optional[str]:
+        premises_pk = self.request.GET.get("premises", None)
+        if premises_pk is None:
+            messages.error(self.request, "The GET 'premises' parameter is not set.")
+            return self.request.headers.get("referer", "/")
+        try:
+            premises = Premises.objects.get(pk=premises_pk)
+        except Premises.DoesNotExist:
+            messages.error(self.request, "Premises does not exist.")
+            return self.request.headers.get("referer", "/")
+        procedure = Procedure.objects.create()
+        procedure.premises.set([premises])
+        procedure.save()
+        messages.success(self.request, "The procedure has been created.")
+        return procedure.get_absolute_url()
 
 
 class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):

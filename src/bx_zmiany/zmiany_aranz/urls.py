@@ -16,6 +16,7 @@ from zmiany_aranz.views import (
     SendEmailView,
     PremisesImportView,
     PremisesSymbolRedirectView,
+    ProcedureCreateRedirect,
 )
 
 from .models import (
@@ -219,5 +220,10 @@ urlpatterns = [
         "premises-redirect/",
         PremisesSymbolRedirectView.as_view(),
         name="premises_redirect",
+    ),
+    path(
+        "procedure/create/",
+        ProcedureCreateRedirect.as_view(),
+        name="procedure_create_redirect",
     ),
 ]
