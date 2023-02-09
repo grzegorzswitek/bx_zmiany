@@ -4,7 +4,13 @@ import csv
 from django import forms
 from django.core.validators import FileExtensionValidator
 
-from zmiany_aranz.models import Building, KindOfPremises, Premises
+from .models import (
+    Building,
+    KindOfPremises,
+    Premises,
+    InvestmentStage,
+    Investment,
+)
 from .validators import PremisesImportDataValidator
 
 from utils.forms.fields import MultiEmailRecipientField
@@ -95,3 +101,21 @@ class PremisesImportForm(forms.Form):
             return is_valid
         self._add_premises()
         return is_valid
+
+
+class ProcedureSearchForm(forms.Form):
+    investment = forms.ModelMultipleChoiceField(
+        Investment.objects.all(),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+    )
+    investment_stage = forms.ModelMultipleChoiceField(
+        InvestmentStage.objects.all(),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+    )
+    building = forms.ModelMultipleChoiceField(
+        Building.objects.all(),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+    )

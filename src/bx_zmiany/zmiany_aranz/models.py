@@ -13,7 +13,7 @@ from django.template.defaultfilters import slugify
 
 from zmiany_aranz.string_replacer import Replacer
 
-from .managers import CustomUserManager
+from .managers import CustomUserManager, ProcedureQuerySet
 from .apps import ZmianyAranzConfig
 
 APP_NAME = ZmianyAranzConfig.name
@@ -93,6 +93,8 @@ class Procedure(models.Model):
     # zakres zmian? jakaś checklista? do tej pory nie miałem
 
     # TODO: wykrywanie zmian osób przynależnych do procedury (zmiana właścicieli mieszkania)
+
+    objects = ProcedureQuerySet.as_manager()
 
     def get_absolute_url(self):
         return reverse(f"{APP_NAME}:procedure_detail_view", kwargs={"pk": self.pk})

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load bootstrap %}
+
+
+{% block content %}
+
+    <form action="." method="get">
+        {{form|bootstrap_horizontal}}
+        <input type="submit" value="Search">
+    </form>
+    <br>
+    
+    {% for procedure in object_list %}
+        <div style="line-height: 1.5;"><a href="{{ procedure.get_absolute_url}}">{{procedure.premises.all|join:", "}}</a></div>
+    {% endfor %}
+    <br>
+    {% include '_pagination.html' %}
+        
+{% endblock content %}
+    

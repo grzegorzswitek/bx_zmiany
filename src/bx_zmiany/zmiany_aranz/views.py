@@ -27,7 +27,7 @@ from .models import (
     EmailAction,
     InvestmentStage,
 )
-from .forms import SendEmailForm, PremisesImportForm
+from .forms import SendEmailForm, PremisesImportForm, ProcedureSearchForm
 from zmiany_aranz.string_replacer import Replacer
 
 from zmiany_aranz.apps import ZmianyAranzConfig
@@ -96,6 +96,29 @@ class ProcedureCreateRedirect(RedirectView):
         procedure.save()
         messages.success(self.request, "The procedure has been created.")
         return procedure.get_absolute_url()
+
+
+class ProcedureListView(ListView):
+    model = Procedure
+    paginate_by = 30
+    template_name = f"{APP_NAME}/procedure_list.html"
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        queryset = object_list if object_list is not None else self.object_list
+
+        form = ProcedureSearchForm(self.request.GET)
+        if form.is_valid():
+            investments = form.cleaned_data.get("investment")
+            investment_stages = form.cleaned_data.get("investment_stage")
+            buildings = form.cleaned_data.get("building")
+            if investments:
+                queryset = queryset.investment__in(investments)
+            if investment_stages:
+                queryset = queryset.investment_stage__in(investment_stages)
+            if buildings:
+                queryset = queryset.building__in(buildings)
+
+        return super().get_context_data(form=form, object_list=queryset, **kwargs)
 
 
 class ProcedureSubpagesListView(ProcedureSubpagesAbstractView, ListView):

@@ -17,6 +17,7 @@ from zmiany_aranz.views import (
     PremisesImportView,
     PremisesSymbolRedirectView,
     ProcedureCreateRedirect,
+    ProcedureListView,
 )
 
 from .models import (
@@ -226,4 +227,5 @@ urlpatterns = [
         ProcedureCreateRedirect.as_view(),
         name="procedure_create_redirect",
     ),
+    path("procedure/list/", ProcedureListView.as_view(), name="procedure_list"),
 ]
